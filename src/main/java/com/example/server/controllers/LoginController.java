@@ -23,6 +23,7 @@ public class LoginController {
             //TODO: handle exception
             throw new RuntimeException(e);
         }
+        //
     }
 
     @PostMapping("/login")
