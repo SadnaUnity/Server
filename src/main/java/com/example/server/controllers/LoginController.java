@@ -1,4 +1,6 @@
 package com.example.server.controllers;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -6,26 +8,14 @@ import java.sql.*;
 
 @RestController
 public class LoginController {
-
     Connection connectionDB;
-    private String databaseName;
-    private String dbUsername;
-    private String dbPassword;
-    private String dbHostAddress;
-    private String dbHostPort;
-
+    private String databaseName ="sadnaDB";
+    private String dbUsername = "root";
+    private String dbPassword = "Chxkhcmk69";
+    private String dbHostAddress = "34.165.31.251";
+    private String dbHostPort = "3306";
     public LoginController() {
-//        instanceConnectionName = "sadna-db-server";
-        databaseName = "sadnaDB";
-        dbUsername = "root";
-        dbPassword = "Chxkhcmk69";
-        dbHostAddress = "34.165.31.251";
-        dbHostPort = "3306";
         String jdbcUrl = "jdbc:mysql://" + dbHostAddress + ":" + dbHostPort + "/" + databaseName;
-
-//        jdbcUrl = String.format(
-//                "jdbc:mysql://34.165.31.251:3306/%s?cloudSqlInstance=%s&socketFactory=com.google.cloud.sql.mysql.SocketFactory",
-//                databaseName, instanceConnectionName);
         try {
             connectionDB = DriverManager.getConnection(jdbcUrl, dbUsername, dbPassword);
             //TODO: connectionDB.close();
@@ -37,12 +27,14 @@ public class LoginController {
     }
 
     @PostMapping("/login")
-    public String login(@RequestParam String username, @RequestParam String password) {
-        if (checkValidUser(username, password))
-            return "valid";
-        else
-            return "invalid";
+    public ResponseEntity<String> login(@RequestParam String username, @RequestParam String password) {
+        if (checkValidUser(username, password)) {
+            return ResponseEntity.ok("Login successfully");
+        } else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
     }
+
 
     public boolean checkValidUser(String username, String password) {
         boolean validUser = false;
