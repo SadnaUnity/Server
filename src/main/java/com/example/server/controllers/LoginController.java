@@ -19,7 +19,6 @@ public class LoginController {
         try {
             connectionDB = DriverManager.getConnection(jdbcUrl, dbUsername, dbPassword);
             //TODO: connectionDB.close();
-
         } catch (SQLException e) {
             //TODO: handle exception
             throw new RuntimeException(e);
