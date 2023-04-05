@@ -46,8 +46,8 @@ The error object contains two properties:
 
 _code_ (string): A code that indicates the specific error that occurred. Possible values are:  
 **USERNAME_TAKEN**: Indicates that the desired username is already taken.  
-**INVALID_USERNAME**: Indicates that the desired username is invalid (for example, it contains invalid characters or is too long).  
-**INVALID_PASSWORD**: Indicates that the desired password is invalid (for example, it is too short or contains invalid characters).
+**INVALID_USERNAME**: Indicates that the desired username is invalid (for example, it contains invalid characters or is too long).   
+**INVALID_PASSWORD**: Indicates that the desired password is invalid (for example, it is too short or contains invalid characters).  
 **UNKNOWN_ERROR**: Indicates that an unknown error occurred (for example, a database error or a server error).    
 
 _message_ (string): A human-readable message that provides more information about the specific error that occurred.  
