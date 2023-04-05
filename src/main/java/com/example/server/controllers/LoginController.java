@@ -54,6 +54,20 @@ public class LoginController {
         }
     }
 
+    private boolean createCoulmn() {
+
+        String sql = "ALTER TABLE mytable ADD COLUMN mycolumn VARCHAR(255)";
+        Statement statement = null;
+        try {
+            statement = connectionDB.createStatement();
+            statement.executeUpdate(sql);
+            statement.close();
+            System.out.println("Column added successfully");
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return true;
+    }
     private boolean checkValidUserDetailsLogin(String username, String password) {
         boolean validUser = false;
         try {
