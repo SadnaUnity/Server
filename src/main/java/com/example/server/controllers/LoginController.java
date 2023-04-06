@@ -1,4 +1,8 @@
 package com.example.server.controllers;
+import com.example.server.Database;
+import com.example.server.response.ErrorResponse;
+import com.example.server.response.Response;
+import com.example.server.response.SuccessResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -8,23 +12,12 @@ import java.sql.*;
 
 @RestController
 public class LoginController {
+    Database connectionDBInstance;
     Connection connectionDB;
-    private String databaseName = "sadnaDB";
-    private String dbUsername = "root";
-    private String dbPassword = "Chxkhcmk69";
-    private String dbHostAddress = "34.165.31.251";
-    private String dbHostPort = "3306";
-
     public LoginController() {
-        String jdbcUrl = "jdbc:mysql://" + dbHostAddress + ":" + dbHostPort + "/" + databaseName;
-        try {
-            connectionDB = DriverManager.getConnection(jdbcUrl, dbUsername, dbPassword);
-            //TODO: connectionDB.close();
-        } catch (SQLException e) {
-            //TODO: handle exception
-            // throw new RuntimeException(e);
-        }
-        // try
+        connectionDBInstance = Database.getInstance();
+        connectionDB = connectionDBInstance.getConnection();
+//        connectionDBInstance = Database.getInstance();
     }
 
     @PostMapping("/login")
@@ -72,8 +65,8 @@ public class LoginController {
         boolean validUser = false;
         try {
             String sql = "SELECT * FROM users"; //Prepare the SQL statement
-            Statement stmt = connectionDB.createStatement();
-            ResultSet dbResponse = stmt.executeQuery(sql); // Execute the SQL statement and get the results
+            Statement statement = connectionDB.createStatement();
+            ResultSet dbResponse = statement.executeQuery(sql); // Execute the SQL statement and get the results
 
             while (dbResponse.next()) {
                 if (dbResponse.getString("username").equals(username)) {
@@ -83,7 +76,7 @@ public class LoginController {
             }
 
             dbResponse.close();
-            stmt.close();
+            statement.close();
         } catch (SQLException e) {
             System.out.println("Error: " + e.getMessage());
         }
@@ -94,8 +87,8 @@ public class LoginController {
         boolean userExist = false;
         try {
             String sql = "SELECT username FROM users"; //Prepare the SQL statement
-            Statement stmt = connectionDB.createStatement();
-            ResultSet dbResponse = stmt.executeQuery(sql); // Execute the SQL statement and get the results
+            Statement statement = connectionDB.createStatement();
+            ResultSet dbResponse = statement.executeQuery(sql); // Execute the SQL statement and get the results
 
             while (dbResponse.next()) {
                 System.out.println(dbResponse.getString("username"));
@@ -106,7 +99,7 @@ public class LoginController {
             }
 
             dbResponse.close();
-            stmt.close();
+            statement.close();
         } catch (SQLException e) {
             System.out.println("Error: " + e.getMessage());
         }
@@ -133,9 +126,9 @@ public class LoginController {
         try {
 //            String query = "INSERT INTO users (username, password, email) VALUES (?, ?, ?)";
             String query = "INSERT INTO users (username, password) VALUES (?, ?)";
-            stmt = connectionDB.prepareStatement(query);
-            stmt.setString(1, username);
-            stmt.setString(2, password);
+            Statement statement = connectionDB.prepareStatement(query);
+            ((PreparedStatement) statement).setString(1, username);
+            ((PreparedStatement) statement).setString(2, password);
 //            stmt.setString(3, email);
             stmt.executeUpdate(); // Execute the INSERT statement
             userCreated=true;

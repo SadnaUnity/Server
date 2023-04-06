@@ -1,9 +1,11 @@
-package com.example.server.controllers;
+package com.example.server.response;
 
-public class ErrorResponse implements Response {
+import com.example.server.response.Response;
+
+public class SuccessResponse implements Response {
     private String message;
 
-    public ErrorResponse(String message) {
+    public SuccessResponse(String message) {
         this.message = message;
     }
 
@@ -15,3 +17,4 @@ public class ErrorResponse implements Response {
         this.message = message;
     }
 }
+
