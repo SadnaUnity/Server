@@ -80,7 +80,7 @@ This endpoint allows a user to post a new poster in a room.
 
 This endpoint creates new room.
 
-**URL:** `/room/`
+**URL:** `/room`
 
 **Method:** `POST`
 
