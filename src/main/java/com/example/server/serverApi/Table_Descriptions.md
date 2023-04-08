@@ -16,6 +16,7 @@ This table stores information about the different chat rooms in the application.
 | --- | --- | --- | --- |
 | room_id | INT | Primary Key | The unique identifier for each room. |
 | manager_id | INT | Foreign Key to `users` table | The ID of the user who manages the room. |
+| max_capacity | INT |  | Max number of users in room in the same time. |
 
 ## `posters` table
 This table stores information about the posters in each room.
