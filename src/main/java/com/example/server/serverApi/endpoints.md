@@ -1,62 +1,100 @@
-# Server Endpoints
-This document outlines the endpoints available on the server.
+# API Endpoints Documentation
 
-## _Login Endpoint_
-The login endpoint is used to authenticate a user and retrieve a session token.
+## Login
 
-### Request:
-<code>POST /login  
-Content-Type: application/json  
-{ "username": "string", "password": "string" }</code>
+This endpoint allows a user to login and obtain a token.
 
-### Parameters
-_username_ (string, required): The username of the user to authenticate.  
-_password_ (string, required): The password of the user to authenticate.
+**URL:** `/login`
 
-### Response:
-If the authentication is successful, the endpoint returns an HTTP 200 OK status code:  
-<code>HTTP/1.1 200 OK  
-Content-Type: application/json</code>
+**Method:** `POST`
 
-If the authentication fails (for example, if the username or password is incorrect), the endpoint returns an HTTP 401 Unauthorized status code and an error message in the response body:  
-<code>HTTP/1.1 401 Unauthorized
-Content-Type: application/json
-{ "error": "string" } </code>
+**Request Body:**
 
-## _Register Endpoint_
-The register endpoint is used to create a new user account.
+| Field    | Type   | Required | Description           |
+| -------- | ------ | -------- | --------------------- |
+| username | string | Yes      | The user's username.   |
+| password | string | Yes      | The user's password.   |
 
-### Request:
-<code>POST /register  
-Content-Type: application/json  
-{ "username": "string", "password": "string" }</code>
+**Response:**
 
-### Parameters:
-_username_ (string, required): The desired username for the new account.  
-_password_ (string, required): The desired password for the new account.
+| Field   | Type   | Description                  |
+| ------- | ------ | ---------------------------- |
+| message | string | A success message.            |
+| user_id   | int | The user's id (uniqe) |
 
-### Response:
+---
 
-If the registration fails, the endpoint returns an HTTP 400 Bad Request status code and an error message in the response body that indicates the specific problem with the registration request:   
-<code>HTTP/1.1 400 Bad Request  
-Content-Type: application/json  
-{ "error": { "code": "string", "message": "string" } }</code>
+## Register
 
-The error object contains two properties:
+This endpoint allows a user to register and create an account.
 
-_code_ (string): A code that indicates the specific error that occurred. Possible values are:  
-**USERNAME_TAKEN**: Indicates that the desired username is already taken.  
-**INVALID_USERNAME**: Indicates that the desired username is invalid (for example, it contains invalid characters or is too long).   
-**INVALID_PASSWORD**: Indicates that the desired password is invalid (for example, it is too short or contains invalid characters).  
-**UNKNOWN_ERROR**: Indicates that an unknown error occurred (for example, a database error or a server error).
+**URL:** `/register`
 
-_message_ (string): A human-readable message that provides more information about the specific error that occurred.
+**Method:** `POST`
 
-<code>HTTP/1.1 400 Bad Request   
-Content-Type: application/json  
-{ "error": { "code": "USERNAME_TAKEN", "message": "The username 'alice' is already taken" } } </code>
+**Request Body:**
 
-<code>HTTP/1.1 400 Bad Request  
-Content-Type: application/json  
-{ "error": { "code": "INVALID_EMAIL", "message": "The email address 'foo' is not a valid email address" } }</code>  
+| Field    | Type   | Required | Description           |
+| -------- | ------ | -------- | --------------------- |
+| username | string | Yes      | The user's username.   |
+| password | string | Yes      | The user's password.   |
 
+**Response:**
+
+| Field   | Type | Description                  |
+| ------- | ---- | ---------------------------- |
+| message | string | Response message .            |
+| user_id | int  | The user's ID.               |
+
+---
+
+## Poster
+
+This endpoint allows a user to post a new poster in a room.
+
+**URL:** `/poster`
+
+**Method:** `POST`
+
+**Request Body:**
+
+| Field       | Type | Required | Description                        |
+| ----------- | ---- | -------- | ---------------------------------- |
+| user_id     | int  | Yes      | The ID of the user posting.        |
+| room_id     | int  | Yes      | The ID of the room to post in.     |
+| poster_name | string | Yes   | The name of the poster.            |
+| image       | file | Yes      | The image of the poster to post.   |
+
+**Response:**
+
+| Field     | Type   | Description                        |
+| --------- | ------ | ---------------------------------- |
+| message   | string | Response message.                  |
+| user_id   | int    | The ID of the user who posted.      |
+| poster_id | int    | The ID of the posted poster.        |
+| room_id   | int    | The ID of the room where posted.    |
+
+---
+
+## Room
+
+This endpoint creates new room.
+
+**URL:** `/room/`
+
+**Method:** `POST`
+
+**Request Body:**
+
+| Field       | Type | Required | Description                        |
+| ----------- | ---- | -------- | ---------------------------------- |
+| manager_id     | int  | Yes      | The ID of the admin.        |
+| room_name       | string | Yes      | The name of the room.   |
+
+**Response:**
+
+| Field     | Type   | Description                        |
+| --------- | ------ | ---------------------------------- |
+| message   | string | Response message.                  |
+| room_id   | int    | The ID of the room where the poster is posted. |
+| user_id | string | The URL of the poster image.        |
