@@ -144,6 +144,9 @@ This endpoint creates new room.
 | ----------- | ---- | -------- | ---------------------------------- |
 | managerId     | int  | Yes      | The ID of the admin.        |
 | roomName       | string | Yes      | The name of the room.   |
+| maxCapacity       | int | No      | Max users in the room in the same time.  Default: 10 |
+| privacy       | boolean | No      | Indicates whether the room is private (TRUE) or public (FALSE). Default: False    |
+
 
 **Example Request:**  
 
@@ -160,6 +163,8 @@ This endpoint creates new room.
 | message   | string | Response message.                  |
 | roomId   | int    | The ID of the room where the poster is posted. |
 | userId | string | The URL of the poster image.        |
+| maxCapacity       | int | Max users in the room in the same time.  Default: 10 |
+| privacy       | boolean | Indicates whether the room is private (TRUE) or public (FALSE). Default: False    |. 
 
 **Example Response:**  
 
