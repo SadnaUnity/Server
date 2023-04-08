@@ -60,9 +60,9 @@ This endpoint allows a user to post a new poster in a room.
 
 | Field       | Type | Required | Description                        |
 | ----------- | ---- | -------- | ---------------------------------- |
-| user_id     | int  | Yes      | The ID of the user posting.        |
-| room_id     | int  | Yes      | The ID of the room to post in.     |
-| poster_name | string | Yes   | The name of the poster.            |
+| userId     | int  | Yes      | The ID of the user posting.        |
+| roomId     | int  | Yes      | The ID of the room to post in.     |
+| posterName | string | Yes   | The name of the poster.            |
 | image       | file | Yes      | The image of the poster to post.   |
 
 **Response:**
@@ -70,9 +70,9 @@ This endpoint allows a user to post a new poster in a room.
 | Field     | Type   | Description                        |
 | --------- | ------ | ---------------------------------- |
 | message   | string | Response message.                  |
-| user_id   | int    | The ID of the user who posted.      |
-| poster_id | int    | The ID of the posted poster.        |
-| room_id   | int    | The ID of the room where posted.    |
+| userId   | int    | The ID of the user who posted.      |
+| posterId | int    | The ID of the posted poster.        |
+| roomId   | int    | The ID of the room where posted.    |
 
 ---
 
@@ -88,13 +88,13 @@ This endpoint creates new room.
 
 | Field       | Type | Required | Description                        |
 | ----------- | ---- | -------- | ---------------------------------- |
-| manager_id     | int  | Yes      | The ID of the admin.        |
-| room_name       | string | Yes      | The name of the room.   |
+| managerId     | int  | Yes      | The ID of the admin.        |
+| roomName       | string | Yes      | The name of the room.   |
 
 **Response:**
 
 | Field     | Type   | Description                        |
 | --------- | ------ | ---------------------------------- |
 | message   | string | Response message.                  |
-| room_id   | int    | The ID of the room where the poster is posted. |
-| user_id | string | The URL of the poster image.        |
+| roomId   | int    | The ID of the room where the poster is posted. |
+| userId | string | The URL of the poster image.        |
