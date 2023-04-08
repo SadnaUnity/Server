@@ -32,7 +32,7 @@ public class LoginController {
 
     @PostMapping("/register")
     public ResponseEntity<Response> register(@RequestParam String username, @RequestParam String password) {
-        if (connectionDBInstance.checkUserExist(username)) {
+        if (connectionDBInstance.checkUsernameExist(username)) {
             return ResponseEntity.status(ServerConstants.BAD_REQUEST_RESPONSE_CODE).body(new LoginResponse(String.format(ServerConstants.USER_EXISTS, username), null));
         } else if (!isValidUserName(username) || !isValidPassword(password)) {
             return ResponseEntity.status(ServerConstants.BAD_REQUEST_RESPONSE_CODE).body(new LoginResponse(ServerConstants.INVALID_USERNAME_OR_PASSWORD, null));

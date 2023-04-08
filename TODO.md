@@ -1,1 +1,3 @@
 ## encoding passwords
+
+## failed create something in the middle: user id. create room...
