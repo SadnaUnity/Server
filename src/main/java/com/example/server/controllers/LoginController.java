@@ -17,31 +17,30 @@ public class LoginController {
     public LoginController() {
         connectionDBInstance = Database.getInstance();
         connectionDB = connectionDBInstance.getConnection();
-        printEverything();
+//        printEverything();
     }
 
     @PostMapping("/login")
     public ResponseEntity<Response> login(@RequestParam String username, @RequestParam String password) {
         Integer user_id = checkValidUserDetailsLogin(username.trim(), password.trim());
         if (user_id != 0) {
-            return ResponseEntity.status(HttpStatus.OK).body(new LoginResponse("Login successfully", user_id.toString()));
+            return ResponseEntity.status(HttpStatus.OK).body(new LoginResponse(ServerConstants.LOGIN_SUCCESSFULLY, user_id));
         } else {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new LoginResponse("The username or password you entered is not correct.", null));
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new LoginResponse(ServerConstants.INVALID_USERNAME_OR_PASSWORD, null));
         }
     }
 
     @PostMapping("/register")
     public ResponseEntity<Response> register(@RequestParam String username, @RequestParam String password) {
         if (connectionDBInstance.checkUserExist(username)) {
-            return ResponseEntity.status(ServerConstants.BAD_REQUEST_RESPONSE_CODE).body(new LoginResponse(String.format(ServerConstants.USER_EXISTS_MESSAGE, username), null));
+            return ResponseEntity.status(ServerConstants.BAD_REQUEST_RESPONSE_CODE).body(new LoginResponse(String.format(ServerConstants.USER_EXISTS, username), null));
         } else if (!isValidUserName(username) || !isValidPassword(password)) {
-            return ResponseEntity.status(ServerConstants.BAD_REQUEST_RESPONSE_CODE).body(new LoginResponse(ServerConstants.INVALID_USERNAME_OR_PASSWORD_MESSAGE, null));
+            return ResponseEntity.status(ServerConstants.BAD_REQUEST_RESPONSE_CODE).body(new LoginResponse(ServerConstants.INVALID_USERNAME_OR_PASSWORD, null));
         }
         Integer user_id = createNewUserInSystem(username, password);
         HttpStatus status = user_id != null ? HttpStatus.OK : HttpStatus.INTERNAL_SERVER_ERROR;
-        String message = user_id != null ? "User created successfully" : "Unexpected error has occurred";
-        String userIdStr = user_id != null ? user_id.toString() : null;
-        return ResponseEntity.status(status).body(new LoginResponse(message, userIdStr));
+        String message = user_id != null ? String.format(ServerConstants.USER_CREATED_SUCCESSFULLY,username) : ServerConstants.UNEXPECTED_ERROR;
+        return ResponseEntity.status(status).body(new LoginResponse(message, user_id));
     }
 
     private Integer checkValidUserDetailsLogin(String username, String password) {
