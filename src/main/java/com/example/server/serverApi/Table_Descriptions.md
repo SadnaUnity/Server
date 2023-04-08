@@ -26,3 +26,5 @@ This table stores information about the posters in each room.
 | user_id | INT | Foreign Key to `users` table | The ID of the user who posted the image. |
 | image | BLOB | | The image data for the poster. |
 | room_id | INT | Foreign Key to `rooms` table | The ID of the room in which the poster was posted. |
+| poster_name | VARCHAR(50) | | The room name (uniqe) |
+
