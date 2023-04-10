@@ -1,4 +1,8 @@
 package com.example.server.controllers;
+import com.example.server.Database;
+import com.example.server.ServerConstants;
+import com.example.server.response.LoginResponse;
+import com.example.server.response.Response;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -8,95 +12,61 @@ import java.sql.*;
 
 @RestController
 public class LoginController {
+    Database connectionDBInstance;
     Connection connectionDB;
-    private String databaseName = "sadnaDB";
-    private String dbUsername = "root";
-    private String dbPassword = "Chxkhcmk69";
-    private String dbHostAddress = "34.165.31.251";
-    private String dbHostPort = "3306";
-
     public LoginController() {
-        String jdbcUrl = "jdbc:mysql://" + dbHostAddress + ":" + dbHostPort + "/" + databaseName;
-        try {
-            connectionDB = DriverManager.getConnection(jdbcUrl, dbUsername, dbPassword);
-            //TODO: connectionDB.close();
-        } catch (SQLException e) {
-            //TODO: handle exception
-            // throw new RuntimeException(e);
-        }
-        // try
+        connectionDBInstance = Database.getInstance();
+        connectionDB = connectionDBInstance.getConnection();
+//        printEverything();
     }
 
     @PostMapping("/login")
     public ResponseEntity<Response> login(@RequestParam String username, @RequestParam String password) {
-        if (checkValidUserDetailsLogin(username.trim(), password.trim())) {
-            return ResponseEntity.status(HttpStatus.OK).body(new SuccessResponse("Login successfully"));
+        Integer user_id = checkValidUserDetailsLogin(username.trim(), password.trim());
+        if (user_id != 0) {
+            return ResponseEntity.status(HttpStatus.OK).body(new LoginResponse(ServerConstants.LOGIN_SUCCESSFULLY, user_id));
         } else {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ErrorResponse("The username or password you entered is not correct."));
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new LoginResponse(ServerConstants.INVALID_USERNAME_OR_PASSWORD, null));
         }
     }
 
     @PostMapping("/register")
-    public ResponseEntity<Response> register(@RequestParam String username, @RequestParam String password, @RequestParam String email) {
-        if (checkUserExist(username)) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorResponse("Username '" + username + "' is already exists"));
+    public ResponseEntity<Response> register(@RequestParam String username, @RequestParam String password) {
+        if (connectionDBInstance.checkUsernameExist(username)) {
+            return ResponseEntity.status(ServerConstants.BAD_REQUEST_RESPONSE_CODE).body(new LoginResponse(String.format(ServerConstants.USER_EXISTS, username), null));
+        } else if (!isValidUserName(username) || !isValidPassword(password)) {
+            return ResponseEntity.status(ServerConstants.BAD_REQUEST_RESPONSE_CODE).body(new LoginResponse(ServerConstants.INVALID_USERNAME_OR_PASSWORD, null));
         }
-        if (!isValidUserName(username)) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorResponse("Invalid user name!"));
-        }
-        if (!isValidPassword(password)) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorResponse("Invalid user password!"));
-        }
-        if (createNewUserInSystem(username, password, email)) {
-            return ResponseEntity.status(HttpStatus.OK).body(new SuccessResponse("User created successfully"));
-        } else {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorResponse("Unexpected error has occurred"));
-        }
+        Integer user_id = createNewUserInSystem(username, password);
+        HttpStatus status = user_id != null ? HttpStatus.OK : HttpStatus.INTERNAL_SERVER_ERROR;
+        String message = user_id != null ? String.format(ServerConstants.USER_CREATED_SUCCESSFULLY,username) : ServerConstants.UNEXPECTED_ERROR;
+        return ResponseEntity.status(status).body(new LoginResponse(message, user_id));
     }
 
-    private boolean checkValidUserDetailsLogin(String username, String password) {
-        boolean validUser = false;
+    private Integer checkValidUserDetailsLogin(String username, String password) {
+        Integer user_id = 0;
+        boolean userFound = false;
         try {
             String sql = "SELECT * FROM users"; //Prepare the SQL statement
-            Statement stmt = connectionDB.createStatement();
-            ResultSet dbResponse = stmt.executeQuery(sql); // Execute the SQL statement and get the results
+            Statement statement = connectionDB.createStatement();
+            ResultSet dbResponse = statement.executeQuery(sql); // Execute the SQL statement and get the results
 
-            while (dbResponse.next()) {
-                if (dbResponse.getString("username").equals(username)) {
-                    if (dbResponse.getString("password").equals(password))
-                        validUser = true;
-                }
-            }
-
-            dbResponse.close();
-            stmt.close();
-        } catch (SQLException e) {
-            System.out.println("Error: " + e.getMessage());
-        }
-        return validUser;
-    }
-
-    private boolean checkUserExist(String username) {
-        boolean userExist = false;
-        try {
-            String sql = "SELECT username FROM users"; //Prepare the SQL statement
-            Statement stmt = connectionDB.createStatement();
-            ResultSet dbResponse = stmt.executeQuery(sql); // Execute the SQL statement and get the results
-
-            while (dbResponse.next()) {
+            while (!userFound && dbResponse.next()) {
                 System.out.println(dbResponse.getString("username"));
-                if (dbResponse.getString("username").equals(username)) {
-                    userExist = true;
-                    break;
+                System.out.println(dbResponse.getString("password"));
+                System.out.println(dbResponse.getString("user_id"));
+                if (dbResponse.getString("username").equals(username) && dbResponse.getString("password").equals(password)) {
+                    user_id = dbResponse.getInt("user_id");
+                    userFound = true;
                 }
             }
-
             dbResponse.close();
-            stmt.close();
+            statement.close();
         } catch (SQLException e) {
             System.out.println("Error: " + e.getMessage());
+        } finally {
+            return user_id;
         }
-        return userExist;
     }
 
     private boolean isValidUserName(String userName) {
@@ -113,30 +83,61 @@ public class LoginController {
         return password.matches("[a-zA-Z0-9]+"); // Password contains only letters and digits
     }
 
-    private boolean createNewUserInSystem(String username, String password, String email) {
-        PreparedStatement stmt = null;
+    private Integer createNewUserInSystem(String username, String password) {
+        Integer user_id = null;
         boolean userCreated = false;
         try {
-//            String query = "INSERT INTO users (username, password, email) VALUES (?, ?, ?)";
             String query = "INSERT INTO users (username, password) VALUES (?, ?)";
-            stmt = connectionDB.prepareStatement(query);
+            PreparedStatement stmt = connectionDB.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
             stmt.setString(1, username);
             stmt.setString(2, password);
-//            stmt.setString(3, email);
-            stmt.executeUpdate(); // Execute the INSERT statement
-            userCreated=true;
-        } catch (SQLException e) {
-            return userCreated;
-        } finally {
-            if (stmt != null) {
-                try {
-                    stmt.close();
-                } catch (SQLException e) {
-                    throw new RuntimeException(e);
-                }
-                return userCreated;
+            stmt.executeUpdate();
+            userCreated = true;
+
+            // Get the generated user_id value
+            ResultSet rs = stmt.getGeneratedKeys();
+            if (rs.next()) {
+                user_id = rs.getInt(1);
             }
+            stmt.close();
+        } catch (SQLException e) {
+            if(userCreated){
+                //TODO handle case
+            }
+        } finally {
+            return user_id;
         }
-        return userCreated;
     }
+    private void printEverything(){
+        try {
+
+            // Create a SELECT statement to retrieve the data from your table
+            String sql = "SELECT * FROM users";
+            Statement stmt = connectionDB.createStatement();
+
+            // Execute the SELECT statement and retrieve the ResultSet
+            ResultSet rs = stmt.executeQuery(sql);
+
+            // Loop through the ResultSet and print each row
+            while (rs.next()) {
+                // Get the values for each column in the current row
+                int id = rs.getInt("user_id");
+                String username = rs.getString("username");
+                int password = rs.getInt("password");
+
+                // Print the values to the console or to a file
+                System.out.println(id + ", " + username + ", " + password);
+            }
+
+            // Close the resources
+            rs.close();
+            stmt.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+
+
 }
