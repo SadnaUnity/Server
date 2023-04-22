@@ -7,6 +7,7 @@ public class ServerConstants {
     public static final String ROOM_EXISTS = "Room with name: '%s' is already exist";
     public static final String POSTER_EXISTS = "Poster with name: '%s' is already exist";
     public static final String ROOM_ID_NOT_EXISTS = "ERROR! Room Id: '%s' isn't exist";
+    public static final String POSTER_ID_NOT_EXISTS = "ERROR! Poster Id: '%s' isn't exist";
     public static final String USER_ID_NOT_EXISTS = "ERROR! User Id: '%s' isn't exist";
     public static final String AVATAR_NOT_EXISTS = "ERROR! Avatar for user id: '%s' isn't exist";
     public static final String ROOM_CREATED_SUCCESSFULLY = "Room: '%s' created successfully";

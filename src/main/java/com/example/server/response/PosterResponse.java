@@ -1,20 +1,24 @@
 package com.example.server.response;
 
+import com.example.server.entities.Poster;
+
 public class PosterResponse implements Response {
     private String message;
-    private Integer user_id;
     private Integer poster_id;
+    private Poster poster;
 
-    public PosterResponse(String message, Integer user_id, Integer poster_id) {
+    public PosterResponse(String message, Integer poster_id, Poster poster) {
         this.message = message;
         this.poster_id = poster_id;
-        this.user_id = user_id;
+        this.poster = poster;
     }
+
+    public Poster getPoster() {
+        return poster;
+    }
+
     public String getMessage() {
         return message;
-    }
-    public Integer getUserId() {
-        return user_id;
     }
 
     public Integer getPosterId() {

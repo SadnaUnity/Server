@@ -30,7 +30,7 @@ public class Database {
         return connectionDB;
     }
 
-    public boolean checkRoomIdExist(Integer roomId){
+    public boolean isRoomIdExist(Integer roomId){
         boolean roomExist = false;
         try {
             String sql = "SELECT room_id FROM rooms"; //Prepare the SQL statement
@@ -38,7 +38,7 @@ public class Database {
             ResultSet dbResponse = statement.executeQuery(sql); // Execute the SQL statement and get the results
 
             while (dbResponse.next()) {
-                if (dbResponse.getString("roomId").equals(roomId)) {
+                if (dbResponse.getInt("room_id")==roomId) {
                     roomExist = true;
                     break;
                 }
@@ -51,8 +51,29 @@ public class Database {
         }
         return roomExist;
     }
+    public boolean isPosterIdExist(Integer posterId){
+        boolean posterExist = false;
+        try {
+            String sql = "SELECT poster_id FROM posters"; //Prepare the SQL statement
+            Statement statement = connectionDB.createStatement();
+            ResultSet dbResponse = statement.executeQuery(sql); // Execute the SQL statement and get the results
 
-    public boolean checkRoomNameExist(String roomName) {
+            while (dbResponse.next()) {
+                if (dbResponse.getInt("poster_id")==posterId) {
+                    posterExist = true;
+                    break;
+                }
+            }
+
+            dbResponse.close();
+            statement.close();
+        } catch (SQLException e) {
+            System.out.println("Error: " + e.getMessage());
+        }
+        return posterExist;
+    }
+
+    public boolean isRoomNameExist(String roomName) {
         boolean roomExist = false;
         try {
             String sql = "SELECT room_name FROM rooms"; //Prepare the SQL statement
@@ -75,7 +96,7 @@ public class Database {
         return roomExist;
     }
 
-    public boolean checkPosterNameExist(String posterName) {
+    public boolean isPosterNameExist(String posterName) {
         boolean posterExist = false;
         try {
             String sql = "SELECT poster_name FROM posters"; //Prepare the SQL statement
@@ -98,7 +119,7 @@ public class Database {
         return posterExist;
     }
 
-    public boolean checkUsernameExist(String username) {
+    public boolean isUsernameExist(String username) {
         boolean userExist = false;
         try {
             String sql = "SELECT username FROM users"; //Prepare the SQL statement
@@ -120,7 +141,7 @@ public class Database {
             return userExist;
         }
     }
-    public boolean checkUserIdExist(Integer userId) {
+    public boolean isUserIdExist(Integer userId) {
         boolean userExist = false;
         try {
             String sql = "SELECT user_id FROM users"; //Prepare the SQL statement

@@ -17,26 +17,20 @@ The request should include a JSON object with the following keys:
 
 **Example Request:**. 
 
-{
-  "username": "exampleuser",
-  "password": "examplepassword"
-}
-
-**Response:**. 
-
-The response will include a JSON object with the following keys:
-
-| Field   | Type   | Description                  |
-| ------- | ------ | ---------------------------- |
-| message | string | A success message.            |
-| user_id   | int | The user's id (uniqe) |
+POST /login?username=johndoe&password=secretpassword 
 
 **Example Response:**. 
-
+```json
 {
-  "message": "Login successful.",
-  "user_id": 123
+    "message": "Login successfully",
+    "avatar": {
+        "accessory": "EMPTY",
+        "color": "RED",
+        "name": "maiush"
+    },
+    "userId": 1
 }
+```
 
 ---
 
@@ -150,27 +144,29 @@ This endpoint creates new room.
 
 **Example Request:**  
 
+POST /room?roomName=maiRoom
+body:
+```json
 {
-  "managerId": 123,
-  "roomName": "exampleroom",
+  "maxCapacity":50,
+  "privacy" : true,
+  "managerId":1
 }
-
-
-**Response:**
-
-| Field     | Type   | Description                        |
-| --------- | ------ | ---------------------------------- |
-| message   | string | Response message.                  |
-| roomId   | int    | The ID of the room where the poster is posted. |
-| userId | string | The URL of the poster image.        |
-| maxCapacity       | int | Max users in the room in the same time.  Default: 10 |
-| privacy       | boolean | Indicates whether the room is private (TRUE) or public (FALSE). Default: False    |. 
+```
 
 **Example Response:**  
-
+```json
 {
-  "message": "Room created successfully.",
-  "user_id": 123,
-  "room_id": 456
+  "message": "Room: 'maiRoom' created successfully",
+  "roomId": 11,
+  "room": {
+    "privacy": false,
+    "maxCapacity": 50,
+    "managerId": 1,
+    "roomId": 11,
+    "roomName": "mai's_room"
+  }
 }
+```
+
 
