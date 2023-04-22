@@ -1,8 +1,6 @@
 package com.example.server.controllers;
 import com.example.server.Database;
 import com.example.server.ServerConstants;
-import com.example.server.entities.Avatar;
-import com.example.server.response.AvatarResponse;
 import com.example.server.response.LoginResponse;
 import com.example.server.response.Response;
 import org.springframework.http.HttpStatus;
@@ -10,7 +8,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.sql.*;
-import java.util.Arrays;
 
 @RestController
 public class LoginController {
@@ -36,7 +33,7 @@ public class LoginController {
 
     @PostMapping("/register")
     public ResponseEntity<Response> register(@RequestParam String username, @RequestParam String password) {
-        if (connectionDBInstance.checkUsernameExist(username)) {
+        if (connectionDBInstance.isUsernameExist(username)) {
             return ResponseEntity.status(ServerConstants.BAD_REQUEST_RESPONSE_CODE).body(new LoginResponse(String.format(ServerConstants.USER_EXISTS, username), null,null));
         } else if (!isValidUserName(username) || !isValidPassword(password)) {
             return ResponseEntity.status(ServerConstants.BAD_REQUEST_RESPONSE_CODE).body(new LoginResponse(ServerConstants.INVALID_USERNAME_OR_PASSWORD, null,null));

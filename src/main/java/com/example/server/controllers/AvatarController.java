@@ -10,8 +10,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.sql.*;
-import java.util.Arrays;
-import java.util.Map;
 
 @RestController
 public class AvatarController {
@@ -26,7 +24,7 @@ public class AvatarController {
 
     @PostMapping("/avatar")
     public ResponseEntity<Response> createAvatar(@RequestParam Integer userId, @RequestBody Avatar userRequestAvatar) {
-        if (!connectionDBInstance.checkUserIdExist(userId)) {
+        if (!connectionDBInstance.isUserIdExist(userId)) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new LoginResponse(String.format(ServerConstants.USER_ID_NOT_EXISTS, userId), userId, null));
         }
         String avatarName = userRequestAvatar.getName();

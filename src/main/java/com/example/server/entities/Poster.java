@@ -1,4 +1,4 @@
-package com.example.server.poster;
+package com.example.server.entities;
 
 public class Poster {
     private String name;
