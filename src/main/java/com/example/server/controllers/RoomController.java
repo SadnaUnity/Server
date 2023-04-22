@@ -2,6 +2,7 @@ package com.example.server.controllers;
 
 import com.example.server.Database;
 import com.example.server.ServerConstants;
+import com.example.server.entities.Room;
 import com.example.server.response.ErrorRoomResponse;
 import com.example.server.response.Response;
 import com.example.server.response.SuccessRoomResponse;
@@ -25,9 +26,9 @@ public class RoomController {
     }
 
     @PostMapping("/room")
-    public ResponseEntity<Response> createRoom(@RequestParam String roomName, @RequestParam Integer userId, @RequestBody RequestBodyRoom userRequest) {
-        int maxCapacity = userRequest.getMaxCapacity();
-        boolean privacy = userRequest.isPrivacy();
+    public ResponseEntity<Response> createRoom(@RequestParam String roomName, @RequestParam Integer userId, @RequestBody Room userRequestRoom) {
+        int maxCapacity = userRequestRoom.getMaxCapacity();
+        boolean privacy = userRequestRoom.isPrivacy();
         if (connectionDBInstance.checkRoomNameExist(roomName)) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorRoomResponse(String.format(ServerConstants.ROOM_EXISTS, roomName), userId, null));
         }

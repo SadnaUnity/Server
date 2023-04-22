@@ -5,10 +5,10 @@ import java.sql.*;
 public class Database {
     private static Connection connectionDB;
     private static Database instance = null;
-    private String databaseName = "sadnaDB";
+    private String databaseName = "sadna_db";
     private String dbUsername = "root";
     private String dbPassword = "Chxkhcmk69";
-    private String dbHostAddress = "34.165.31.251";
+    private String dbHostAddress = "34.165.195.48";
     private String dbHostPort = "3306";
     private Database() {
         String jdbcUrl = "jdbc:mysql://" + dbHostAddress + ":" + dbHostPort + "/" + databaseName;
@@ -128,7 +128,8 @@ public class Database {
             ResultSet dbResponse = statement.executeQuery(sql); // Execute the SQL statement and get the results
 
             while (dbResponse.next()) {
-                if (dbResponse.getString("user_id").equals(userId)) {
+                System.out.println(dbResponse.getString("user_id"));
+                if (dbResponse.getInt("user_id")==userId) {
                     userExist = true;
                     break;
                 }
@@ -179,5 +180,16 @@ public class Database {
             throw new RuntimeException(e);
         }
     }
+
+    //create avatars table
+    // CREATE TABLE avatars (
+    //  id INT NOT NULL AUTO_INCREMENT,
+    //  user_id INT NOT NULL,
+    //  avatar_name VARCHAR(255) NOT NULL,
+    //  accessories TEXT NOT NULL,
+    //  color VARCHAR(255) NOT NULL,
+    //  PRIMARY KEY (id),
+    //  UNIQUE KEY (user_id, avatar_name)
+    //);
 
 }
