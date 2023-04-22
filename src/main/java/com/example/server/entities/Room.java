@@ -1,6 +1,6 @@
-package com.example.server.controllers;
+package com.example.server.entities;
 
-public class RequestBodyRoom {
+public class Room {
 
     private boolean privacy;
     private int maxCapacity;
