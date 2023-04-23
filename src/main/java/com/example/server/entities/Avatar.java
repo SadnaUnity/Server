@@ -8,7 +8,7 @@ public class Avatar {
     private Accessory accessory;
     private Color color;
     private String name;
-
+private Integer avatarId;
     public void setName(String name) {
         this.name = name;
     }
@@ -17,10 +17,15 @@ public class Avatar {
         return name;
     }
 
-    public Avatar(Accessory accessory, Color color, String name) {
+    public Integer getAvatarId() {
+        return avatarId;
+    }
+
+    public Avatar(Accessory accessory, Color color, String name, Integer avatarId) {
         this.accessory = accessory;
         this.color = color;
         this.name = name;
+        this.avatarId = avatarId;
     }
 
     // Getters and setters

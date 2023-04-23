@@ -4,6 +4,10 @@ import org.springframework.http.HttpStatus;
 public class ServerConstants {
     public static final int BAD_REQUEST_RESPONSE_CODE = HttpStatus.BAD_REQUEST.value();
     public static final String USER_EXISTS = "Username '%s' already exists";
+    public static final String ROOMS_TABLE = "rooms";
+    public static final String USERS_TABLE = "users";
+    public static final String AVATAR_TABLE = "avatars";
+    public static final String POSTERS_TABLE = "posters";
     public static final String ROOM_EXISTS = "Room with name: '%s' is already exist";
     public static final String POSTER_EXISTS = "Poster with name: '%s' is already exist";
     public static final String ROOM_ID_NOT_EXISTS = "ERROR! Room Id: '%s' isn't exist";

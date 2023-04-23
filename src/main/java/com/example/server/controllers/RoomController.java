@@ -30,7 +30,7 @@ public class RoomController {
         int maxCapacity = userRequestRoom.getMaxCapacity();
         boolean privacy = userRequestRoom.isPrivacy();
         int managerId = userRequestRoom.getManagerId();
-        if (connectionDBInstance.isRoomNameExist(roomName)) {
+        if (connectionDBInstance.isValueExist(ServerConstants.ROOMS_TABLE,"room_name",roomName)) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new RoomResponse(String.format(ServerConstants.ROOM_EXISTS, roomName), null, null));
         }
         Room room = createNewRoom(roomName, managerId, privacy, maxCapacity);
@@ -43,7 +43,7 @@ public class RoomController {
 
     @GetMapping("/room/{roomId}")
     public ResponseEntity<Response> getRoomByRoomId(@PathVariable Integer roomId) {
-        if (!connectionDBInstance.isRoomIdExist(roomId)) {
+        if (!connectionDBInstance.isValueExist(ServerConstants.ROOMS_TABLE,"room_id",roomId)) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new RoomResponse(String.format(ServerConstants.ROOM_ID_NOT_EXISTS, roomId), null, null));
         }
         try {
