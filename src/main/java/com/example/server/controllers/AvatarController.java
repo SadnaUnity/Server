@@ -50,12 +50,12 @@ public class AvatarController {
         properties.put("accessory", userRequestAvatar.getAccessory());
         boolean avatarChanged = updateAvatarsTable(properties);
         if (avatarChanged) {
+            userRequestAvatar.setAvatarId(avatarId);
             return ResponseEntity.ok().body(new AvatarResponse("Avatar properties updated successfully", avatarId, userRequestAvatar));
         } else {
             return ResponseEntity.badRequest().body(new AvatarResponse("Failed to update avatar properties", avatarId, null));
         }
     }
-
 
     @GetMapping("avatar/{avatarId}")
     public ResponseEntity<AvatarResponse> returnAvatarData(@PathVariable Integer avatarId) {
@@ -172,12 +172,13 @@ public class AvatarController {
             }
             // Remove the trailing comma and space from the SQL string
             sql.delete(sql.length() - 2, sql.length());
-
             // Execute the SQL statement
             PreparedStatement statement = connectionDB.prepareStatement(sql.toString());
             for (int i = 0; i < values.size(); i++) {
-                statement.setObject(i + 1, values.get(i));
+                System.out.println(values.get(i).toString());
+                statement.setObject(i + 1, values.get(i).toString());
             }
+            statement.executeUpdate();
             statement.close();
             updatedSuccessfully=true;
         } catch (SQLException e) {
