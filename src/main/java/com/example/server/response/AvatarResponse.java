@@ -5,12 +5,12 @@ import com.example.server.entities.Avatar;
 import java.io.Serializable;
 
 public class AvatarResponse implements Response, Serializable {
-    private Integer user_id;
+    private Integer avatarId;
     private String message;
     private Avatar avatar;
-    public AvatarResponse(String message, Integer user_id, Avatar avatar) {
+    public AvatarResponse(String message, Integer avatarId, Avatar avatar) {
         this.message = message;
-        this.user_id = user_id;
+        this.avatarId = avatarId;
         this.avatar = avatar;
     }
 
@@ -21,19 +21,19 @@ public class AvatarResponse implements Response, Serializable {
         this.avatar = avatar;
     }
 
-    public Integer getUser_id() {
-        return user_id;
+    public Integer getAvatarId() {
+        return avatarId;
     }
 
     public String getMessage() {
         return message;
     }
     public Integer getUserId() {
-        return user_id;
+        return avatarId;
     }
 
-    public void setUser_id(Integer user_id) {
-        this.user_id = user_id;
+    public void setAvatarId(Integer avatarId) {
+        this.avatarId = avatarId;
     }
     public void setMessage(String message) {
         this.message = message;

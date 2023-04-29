@@ -2,9 +2,6 @@ package com.example.server.controllers;
 
 import com.example.server.Database;
 import com.example.server.ServerConstants;
-import com.example.server.entities.Avatar;
-import com.example.server.entities.Poster;
-import com.example.server.response.AvatarResponse;
 import com.example.server.response.PosterResponse;
 import com.example.server.response.Response;
 import org.springframework.http.HttpStatus;
@@ -37,10 +34,10 @@ public class PosterController {
         if (file.isEmpty()) {// Check if the image file is empty or not
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new PosterResponse(ServerConstants.IMAGE_EMPTY, null, null));
         }
-        if (connectionDBInstance.isPosterNameExist(posterName)) {
+        if (connectionDBInstance.isValueExist(ServerConstants.POSTERS_TABLE,"poster_name",posterName)) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new PosterResponse(String.format(ServerConstants.POSTER_EXISTS, posterName), null, null));
         }
-        if (!connectionDBInstance.isRoomIdExist(roomId)) {
+        if (!connectionDBInstance.isValueExist(ServerConstants.ROOMS_TABLE,"room_id",roomId)) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new PosterResponse(String.format(ServerConstants.ROOM_ID_NOT_EXISTS, roomId), null, null));
         }
 //        try {
