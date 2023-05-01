@@ -20,4 +20,5 @@ public class ServerConstants {
     public static final String FAILED_CREATE_AVATAR = "Failed to create avatar";
     public static final String INVALID_USERNAME_OR_PASSWORD = "Invalid username or password!";
     public static final String UNEXPECTED_ERROR = "Unexpected error has occurred";
+    public static final String POS_EXCEPTED = "Pos excepted";
 }

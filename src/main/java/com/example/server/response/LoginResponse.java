@@ -3,12 +3,15 @@ package com.example.server.response;
 import com.example.server.entities.Avatar;
 
 public class LoginResponse implements Response {
-    private Integer user_id;
+    private Integer userId;
     private String message;
     private Avatar avatar;
-    public LoginResponse(String message, Integer user_id, Avatar avatar) {
+
+    public LoginResponse(){}
+
+    public LoginResponse(String message, Integer userId, Avatar avatar) {
         this.message = message;
-        this.user_id = user_id;
+        this.userId = userId;
         this.avatar = avatar;
     }
 
@@ -21,11 +24,11 @@ public class LoginResponse implements Response {
     }
 
     public Integer getUserId() {
-        return user_id;
+        return userId;
     }
 
-    public void setUser_id(Integer user_id) {
-        this.user_id = user_id;
+    public void setUser_id(Integer userId) {
+        this.userId = userId;
     }
 
     public void setMessage(String message) {
