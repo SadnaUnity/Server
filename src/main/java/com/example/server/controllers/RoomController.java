@@ -33,7 +33,10 @@ public class RoomController {
         if (connectionDBInstance.isValueExist(ServerConstants.ROOMS_TABLE,"room_name",roomName)) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new RoomResponse(String.format(ServerConstants.ROOM_EXISTS, roomName), null, null));
         }
-        Room room = createNewRoom(roomName, managerId, privacy, maxCapacity);
+        if (!connectionDBInstance.isValueExist(ServerConstants.USERS_TABLE,"user_id",managerId)) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new RoomResponse(String.format(ServerConstants.ROOM_EXISTS, roomName), null, null));
+        }
+        Room room = addNewRoomToDB(roomName, managerId, privacy, maxCapacity);
         if (room != null) {
             return ResponseEntity.status(HttpStatus.OK).body(new RoomResponse(String.format(ServerConstants.ROOM_CREATED_SUCCESSFULLY, roomName), room.getRoomId(), room));
         } else {
@@ -71,15 +74,6 @@ public class RoomController {
         } catch (SQLException e) {
             return null;
         }
-    }
-
-
-    public Room createNewRoom(String roomName, Integer managerId, boolean privacy, int maxCapacity) {
-       Room room = addNewRoomToDB(roomName,managerId,privacy,maxCapacity);
-       if(room!=null){
-            //update user in the new room
-       }
-       return room;
     }
 
     public Room addNewRoomToDB(String roomName, Integer managerId, boolean privacy, int maxCapacity){

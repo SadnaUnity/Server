@@ -22,6 +22,18 @@ public class ServerConstants {
     public static final String IMAGE_EMPTY = "Image file is empty";
     public static final String FAILED_LOAD_FILE_DATA = "Failed to load file data";
     public static final String FAILED_CREATE_AVATAR = "Failed to create avatar";
+    public static final String FAILED_CREATE_POSTER = "Failed to create poster";
     public static final String INVALID_USERNAME_OR_PASSWORD = "Invalid username or password!";
+    public static final String FILE_TOO_BIG = "File size exceeds the limit.";
     public static final String UNEXPECTED_ERROR = "Unexpected error has occurred";
+    public static final String FILE_UPLOAD_FAILED = "Unexpected error has occurred while trying to upload the file to storage";
+    public static final String UPDATE_DB_WITH_POSTER_DATA = "Unexpected error has occurred while trying to update db with new poster.";
+    public static final String PROJECT_ID = "school-384409";
+    public static final String CREDENTIALS_PATH = "src/main/java/com/example/server/credentialsData.json";
+    static final String DATABASE_NAME = "sadna_db";
+    static final String DB_USER_NAME = "root";
+    static final String DB_PASSWORD = "Chxkhcmk69";
+    static final String DB_HOST = "34.165.195.48";
+    static final String DB_HOST_PORT = "3306";
+    public static final String BUCKET_NAME = "posters-sadna";
 }

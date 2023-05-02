@@ -5,15 +5,11 @@ import java.sql.*;
 public class Database {
     private static Connection connectionDB;
     private static Database instance = null;
-    private String databaseName = "sadna_db";
-    private String dbUsername = "root";
-    private String dbPassword = "Chxkhcmk69";
-    private String dbHostAddress = "34.165.195.48";
-    private String dbHostPort = "3306";
+
     private Database() {
-        String jdbcUrl = "jdbc:mysql://" + dbHostAddress + ":" + dbHostPort + "/" + databaseName;
+        String jdbcUrl = "jdbc:mysql://" + ServerConstants.DB_HOST + ":" + ServerConstants.DB_HOST_PORT + "/" + ServerConstants.DATABASE_NAME;
         try {
-            connectionDB = DriverManager.getConnection(jdbcUrl, dbUsername, dbPassword);
+            connectionDB = DriverManager.getConnection(jdbcUrl, ServerConstants.DB_USER_NAME, ServerConstants.DB_PASSWORD);
             //TODO: connectionDB.close();
         } catch (SQLException e) {
             System.out.println("Error creating database connection: " + e.getMessage());

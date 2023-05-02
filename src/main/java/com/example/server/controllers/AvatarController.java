@@ -26,19 +26,19 @@ public class AvatarController {
 //        printEverything();
     }
 
-    @PostMapping("/avatar")
-    public ResponseEntity<Response> createAvatar(@RequestParam Integer userId, @RequestBody Avatar userRequestAvatar) {
-        if (!connectionDBInstance.isValueExist(ServerConstants.USERS_TABLE,"user_id",userId)) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new LoginResponse(String.format(ServerConstants.USER_ID_NOT_EXISTS, userId), userId,userId, null));
-        }
-        String avatarName = userRequestAvatar.getName();
-        Avatar.Accessory accessory = userRequestAvatar.getAccessory();
-        Avatar.Color color = userRequestAvatar.getColor();
-        Avatar avatar = addNewAvatarToSystem(userId, avatarName, color, accessory);
-        HttpStatus status = (avatar != null) ? HttpStatus.OK : HttpStatus.BAD_REQUEST;
-        String message = (avatar != null) ? ServerConstants.AVATAR_CREATED_SUCCESSFULLY : ServerConstants.FAILED_CREATE_AVATAR;
-        return ResponseEntity.status(status).body(new AvatarResponse(String.format(message, avatarName), userId, avatar));
-    }
+//    @PostMapping("/avatar")
+//    public ResponseEntity<Response> createAvatar(@RequestParam Integer userId, @RequestBody Avatar userRequestAvatar) {
+//        if (!connectionDBInstance.isValueExist(ServerConstants.USERS_TABLE,"user_id",userId)) {
+//            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new LoginResponse(String.format(ServerConstants.USER_ID_NOT_EXISTS, userId), userId,userId, null));
+//        }
+//        String avatarName = userRequestAvatar.getName();
+//        Avatar.Accessory accessory = userRequestAvatar.getAccessory();
+//        Avatar.Color color = userRequestAvatar.getColor();
+//        Avatar avatar = addNewAvatarToSystem(userId, avatarName, color, accessory);
+//        HttpStatus status = (avatar != null) ? HttpStatus.OK : HttpStatus.BAD_REQUEST;
+//        String message = (avatar != null) ? ServerConstants.AVATAR_CREATED_SUCCESSFULLY : ServerConstants.FAILED_CREATE_AVATAR;
+//        return ResponseEntity.status(status).body(new AvatarResponse(String.format(message, avatarName), userId, avatar));
+//    }
     @PutMapping("/avatar/{avatarId}")
     public ResponseEntity<AvatarResponse> editAvatarProperties(@RequestBody Avatar userRequestAvatar, @PathVariable Integer avatarId) {
         if (!connectionDBInstance.isValueExist(ServerConstants.AVATAR_TABLE, "avatar_id", avatarId)) {
