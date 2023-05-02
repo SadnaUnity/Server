@@ -7,8 +7,8 @@ public class Poster {
     private Integer userId;
     private Integer posterId;
 
-    public Poster(String name, String fileUrl, Integer roomId, Integer userId, Integer posterId) {
-        this.posterName = name;
+    public Poster(String posterName, String fileUrl, Integer roomId, Integer userId, Integer posterId) {
+        this.posterName = posterName;
         this.fileUrl = fileUrl;
         this.roomId = roomId;
         this.userId = userId;
@@ -29,5 +29,8 @@ public class Poster {
 
     public Integer getUserId() {
         return userId;
+    }
+    public String getPosterName() {
+        return posterName;
     }
 }
