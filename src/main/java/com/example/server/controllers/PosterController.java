@@ -19,6 +19,9 @@ import org.springframework.web.multipart.MultipartFile;
 import com.google.cloud.storage.Blob;
 import java.io.*;
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import static com.example.server.response.Response.badRequestResponse;
@@ -63,14 +66,46 @@ public class PosterController {
             byte[] fileData = file.getBytes();
             Blob blob = gcpStorage.create(blobInfo, fileData);
             String fileUrl = blob.getMediaLink();
-            Poster poster = addPosterToDB(posterName, userId, roomId, fileUrl);
+            Poster poster = addNewPosterToDB(posterName, userId, roomId, fileUrl);
             return ResponseEntity.status(HttpStatus.OK).body(new PosterResponse(String.format(ServerConstants.POSTER_CREATED_SUCCESSFULLY, posterName), poster.getPosterId(), poster));
         } catch (Exception err) {
             return serverErrorResponse(ServerConstants.FILE_UPLOAD_FAILED, userId, null);
         }
     }
+    @GetMapping("poster/{posterId}")
+    public ResponseEntity<PosterResponse> returnPosterData(@PathVariable Integer posterId) {
+        if (!connectionDBInstance.isValueExist(ServerConstants.POSTERS_TABLE, "poster_id", posterId)) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new PosterResponse(String.format(ServerConstants.POSTER_ID_NOT_EXISTS, posterId), null, null));
+        }
+        Poster poster = getPoster(posterId);
+        if (poster != null) {
+            return ResponseEntity.ok().body(new PosterResponse("Valid Poster", posterId, poster));
+        } else {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new PosterResponse(ServerConstants.UNEXPECTED_ERROR, posterId, null));
+        }
+    }
 
-    private Poster addPosterToDB(String posterName, Integer userId, Integer roomId, String url) {
+    @PostMapping("/deletePoster/{posterId}")
+    public ResponseEntity<Response> deletePoster(@PathVariable("posterId") Integer posterId) {
+        if (!connectionDBInstance.isValueExist(ServerConstants.POSTERS_TABLE, "poster_id", posterId)) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new PosterResponse(String.format(ServerConstants.POSTER_ID_NOT_EXISTS, posterId), null, null));
+        }
+        try {
+            String sql = "DELETE FROM posters WHERE poster_id = ?";
+            PreparedStatement pstmt = connectionDB.prepareStatement(sql);
+            pstmt.setInt(1, posterId);
+            int rowsDeleted = pstmt.executeUpdate();
+            if (rowsDeleted == 0) {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new PosterResponse(String.format(ServerConstants.UNEXPECTED_ERROR, posterId), posterId, null));
+            } else {
+                return ResponseEntity.status(HttpStatus.OK).body(new PosterResponse(String.format(ServerConstants.POSTER_DELETED_SUCCESSFULLY, posterId), posterId, null));
+            }
+        } catch (SQLException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new PosterResponse(String.format(ServerConstants.UNEXPECTED_ERROR, posterId), posterId, null));
+        }
+    }
+
+    private Poster addNewPosterToDB(String posterName, Integer userId, Integer roomId, String url) {
         Poster poster = null;
         try {
             String sql = "INSERT INTO posters (user_id, room_id, poster_name, url) VALUES (?, ?, ?, ?)";
@@ -96,6 +131,24 @@ public class PosterController {
             return poster;
         }
     }
+    private Poster getPoster(Integer posterId){
+        try {
+            PreparedStatement stmt = connectionDB.prepareStatement("SELECT * FROM posters WHERE poster_id = ?");
+            stmt.setInt(1, posterId);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                Integer roomId = rs.getInt("room_id");
+                Integer userId = rs.getInt("user_id");
+                String posterName = rs.getString("poster_name");
+                String fileUrl = rs.getString("url");
+                return new Poster(posterName,fileUrl,roomId,userId,posterId);
+            } else {
+                return null;
+            }
+        } catch (SQLException e) {
+            return null;
+        }
+    }
 
     private void newPosterTest() throws IOException {
         File file = new File("/Users/I567591/Downloads/9AD1CC86-C9EF-48C6-8083-E066B42BEAAD.jpg");
@@ -103,65 +156,5 @@ public class PosterController {
         createPoster("first poster",1,1,multipartFile);
     }
 
-//    @GetMapping("poster/{posterId}")
-//    public ResponseEntity<PosterResponse> returnPosterData(@PathVariable Integer posterId) {
-//        if(!connectionDBInstance.isPosterIdExist(posterId)){
-//            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new PosterResponse(String.format(ServerConstants.POSTER_ID_NOT_EXISTS,posterId), null, null));
-//        }
-//        try {
-//            Avatar poster = getPoster(posterId);
-//            if (poster != null) {
-//                return ResponseEntity.ok().body(new PosterResponse("Valid Poster", posterId, poster));
-//            } else {
-//            }
-//        } catch (Exception err) {
-//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new AvatarResponse(ServerConstants.UNEXPECTED_ERROR, userId, null));
-//        }
-//    }
-//    public Poster addPosterToDB(String posterName, Integer userId, Integer roomId, byte[] fileData) {
-//        boolean processCompleted=false;
-//        String insertSql = "INSERT INTO posters (poster_name, user_id, room_id, image) VALUES (?, ?, ?, ?)";
-//        Integer poster_id = null;
-//        Poster poster=null;
-//        try {
-//            PreparedStatement stmt = connectionDB.prepareStatement(insertSql, Statement.RETURN_GENERATED_KEYS);
-//            stmt.setString(1, posterName);
-//            stmt.setInt(2, userId);
-//            stmt.setInt(3, roomId);
-//            stmt.setBytes(4, fileData);
-//            stmt.executeUpdate();
-//            processCompleted=true;
-//
-//            ResultSet rs = stmt.getGeneratedKeys();
-//            if (rs.next()) {
-//                poster_id = rs.getInt(1);
-//                poster=new Poster(posterName,fileData,roomId,userId);
-//            }
-//            stmt.close();
-//        } catch (SQLException e) {
-//            if(processCompleted){
-//                //TODO
-//            }
-//        } finally {
-//            return poster;
-//        }
-//    }
-//    private Poster getPoster(Integer posterId){
-//        try {
-//            PreparedStatement stmt = connectionDB.prepareStatement("SELECT * FROM posters WHERE poster_id = ?");
-//            stmt.setInt(1, posterId);
-//            ResultSet rs = stmt.executeQuery();
-//            if (rs.next()) {
-//                Avatar.Accessory accessory = Avatar.Accessory.valueOf((rs.getString("accessory")));
-//                String url = Avatar.Color.valueOf(rs.getString("color"));
-//                String name = rs.getString("poster_name");
-//                return new Avatar(accessory, color, name);
-//            } else {
-//                return null;
-//            }
-//        } catch (SQLException e) {
-//            return null;
-//        }
-//    }
 
 }
