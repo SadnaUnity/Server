@@ -26,18 +26,18 @@ public class LoginController {
     public ResponseEntity<Response> login(@RequestParam String username, @RequestParam String password) {
         Integer userId = connectionDBInstance.checkValidUserDetailsLogin(username.trim(), password.trim());
         if (userId != 0) {
-            return ResponseEntity.status(HttpStatus.OK).body(new LoginResponse(ServerConstants.LOGIN_SUCCESSFULLY, userId,userId, avatarController.getAvatar(userId)));
+            return ResponseEntity.status(HttpStatus.OK).body(new LoginResponse(ServerConstants.LOGIN_SUCCESSFULLY, userId,username,userId, avatarController.getAvatar(userId)));
         } else {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new LoginResponse(ServerConstants.INVALID_USERNAME_OR_PASSWORD, null, null,null));
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new LoginResponse(ServerConstants.INVALID_USERNAME_OR_PASSWORD, null,null, null,null));
         }
     }
 
     @PostMapping("/register")
     public ResponseEntity<Response> register(@RequestParam String username, @RequestParam String password) {
         if (connectionDBInstance.isValueExist(ServerConstants.USERS_TABLE,"username",username)) {
-            return ResponseEntity.status(ServerConstants.BAD_REQUEST_RESPONSE_CODE).body(new LoginResponse(String.format(ServerConstants.USER_EXISTS, username), null,null, null));
+            return ResponseEntity.status(ServerConstants.BAD_REQUEST_RESPONSE_CODE).body(new LoginResponse(String.format(ServerConstants.USER_EXISTS, username),null, null,null, null));
         } else if (!isValidUserName(username) || !isValidPassword(password)) {
-            return ResponseEntity.status(ServerConstants.BAD_REQUEST_RESPONSE_CODE).body(new LoginResponse(ServerConstants.INVALID_USERNAME_OR_PASSWORD, null, null,null));
+            return ResponseEntity.status(ServerConstants.BAD_REQUEST_RESPONSE_CODE).body(new LoginResponse(ServerConstants.INVALID_USERNAME_OR_PASSWORD, null, null,null,null));
         }
         Avatar avatar = null;
         Integer user_id = createNewUserInSystem(username, password);
@@ -46,7 +46,7 @@ public class LoginController {
         }
         HttpStatus status = user_id != null ? HttpStatus.OK : HttpStatus.INTERNAL_SERVER_ERROR;
         String message = user_id != null ? String.format(ServerConstants.USER_CREATED_SUCCESSFULLY, username) : ServerConstants.UNEXPECTED_ERROR;
-        return ResponseEntity.status(status).body(new LoginResponse(message, user_id, avatar.getAvatarId(), null));
+        return ResponseEntity.status(status).body(new LoginResponse(message, user_id,username, avatar.getAvatarId(), null));
     }
 
 

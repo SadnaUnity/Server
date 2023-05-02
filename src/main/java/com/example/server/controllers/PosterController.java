@@ -2,67 +2,105 @@ package com.example.server.controllers;
 
 import com.example.server.Database;
 import com.example.server.ServerConstants;
+import com.example.server.entities.Poster;
+import com.example.server.entities.Room;
 import com.example.server.response.PosterResponse;
 import com.example.server.response.Response;
+import com.google.auth.oauth2.GoogleCredentials;
+import com.google.cloud.storage.BlobId;
+import com.google.cloud.storage.BlobInfo;
+import com.google.cloud.storage.Storage;
+import com.google.cloud.storage.StorageOptions;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-
+import com.google.cloud.storage.Blob;
 import java.io.*;
 import java.sql.*;
+import java.util.UUID;
+
+import static com.example.server.response.Response.badRequestResponse;
+import static com.example.server.response.Response.serverErrorResponse;
 
 @RestController
 public class PosterController {
     Database connectionDBInstance;
     Connection connectionDB;
-    
+    Storage gcpStorage;
     public PosterController() {
-        connectionDBInstance = Database.getInstance();
-        connectionDB = connectionDBInstance.getConnection();
-//        try {
-//            newPosterTest();
-//        } catch (IOException e) {
-//            throw new RuntimeException(e);
-//        }
+        try {
+            connectionDBInstance = Database.getInstance();
+            connectionDB = connectionDBInstance.getConnection();
+            gcpStorage = StorageOptions.newBuilder().setProjectId(ServerConstants.PROJECT_ID).setCredentials(GoogleCredentials.fromStream(new FileInputStream(ServerConstants.CREDENTIALS_PATH))).build().getService();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @PostMapping("/poster")
-    public ResponseEntity<Response> createPoster(@RequestParam String posterName, @RequestParam MultipartFile file, @RequestParam Integer userId, @RequestParam Integer roomId) {
-        Integer posterId;
-        if (file.isEmpty()) {// Check if the image file is empty or not
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new PosterResponse(ServerConstants.IMAGE_EMPTY, null, null));
+    public ResponseEntity<Response> createPoster(@RequestParam String posterName, @RequestParam Integer roomId, @RequestParam Integer userId, @RequestPart MultipartFile file) {
+        if (file.isEmpty()) {
+            return badRequestResponse(ServerConstants.IMAGE_EMPTY);
         }
-        if (connectionDBInstance.isValueExist(ServerConstants.POSTERS_TABLE,"poster_name",posterName)) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new PosterResponse(String.format(ServerConstants.POSTER_EXISTS, posterName), null, null));
+        if (file.getSize() > 10485760) {
+            return badRequestResponse(ServerConstants.FILE_TOO_BIG);
         }
-        if (!connectionDBInstance.isValueExist(ServerConstants.ROOMS_TABLE,"room_id",roomId)) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new PosterResponse(String.format(ServerConstants.ROOM_ID_NOT_EXISTS, roomId), null, null));
+        if (connectionDBInstance.isValueExist(ServerConstants.POSTERS_TABLE, "poster_name", posterName)) {
+            return badRequestResponse(String.format(ServerConstants.POSTER_EXISTS, posterName));
         }
-//        try {
-//            byte[] fileData = file.getBytes();
-//            posterId = addPosterToDB(posterName, userId, roomId, fileData);
-//        } catch (IOException e) {
-//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new PosterResponse(ServerConstants.FAILED_LOAD_FILE_DATA, null, null));
-//        }
-//        if (posterId != 0) {
-//            return ResponseEntity.status(HttpStatus.OK).body(new PosterResponse(String.format(ServerConstants.POSTER_CREATED_SUCCESSFULLY, posterName), userId, posterId));
-//        } else {
-//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new PosterResponse(ServerConstants.UNEXPECTED_ERROR, userId, posterId));
-//        }
-        return null;
+        if (!connectionDBInstance.isValueExist(ServerConstants.ROOMS_TABLE, "room_id", roomId)) {
+            return badRequestResponse(String.format(ServerConstants.ROOM_ID_NOT_EXISTS, roomId));
+        }
+        if (!connectionDBInstance.isValueExist(ServerConstants.USERS_TABLE, "user_id", userId)) {
+            return badRequestResponse(String.format(ServerConstants.USER_ID_NOT_EXISTS, userId));
+        }
+        try {
+            String posterId = UUID.randomUUID().toString();
+            BlobId blobId = BlobId.of(ServerConstants.BUCKET_NAME, posterId);
+            BlobInfo blobInfo = BlobInfo.newBuilder(blobId).setContentType(file.getContentType()).build();
+            byte[] fileData = file.getBytes();
+            Blob blob = gcpStorage.create(blobInfo, fileData);
+            String fileUrl = blob.getMediaLink();
+            Poster poster = addPosterToDB(posterName, userId, roomId, fileUrl);
+            return ResponseEntity.status(HttpStatus.OK).body(new PosterResponse(String.format(ServerConstants.POSTER_CREATED_SUCCESSFULLY, posterName), poster.getPosterId(), poster));
+        } catch (Exception err) {
+            return serverErrorResponse(ServerConstants.FILE_UPLOAD_FAILED, userId, null);
+        }
+    }
+
+    private Poster addPosterToDB(String posterName, Integer userId, Integer roomId, String url) {
+        Poster poster = null;
+        try {
+            String sql = "INSERT INTO posters (user_id, room_id, poster_name, url) VALUES (?, ?, ?, ?)";
+            PreparedStatement stmt = connectionDB.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+
+            stmt.setInt(1, userId);
+            stmt.setInt(2, roomId);
+            stmt.setString(3, posterName);
+            stmt.setString(4, url);
+            int rowsAffected = stmt.executeUpdate();
+            if (rowsAffected > 0) {
+                ResultSet rs = stmt.getGeneratedKeys();
+                System.out.println(rs.toString());
+                if (rs.next()) {
+                    Integer posterId = rs.getInt(1);
+                    poster = new Poster(posterName, url, roomId, userId, posterId);
+                }
+            }
+            stmt.close();
+        } catch (SQLException e) {
+            System.out.println("Failed to add poster to database: " + e.getMessage());
+        } finally {
+            return poster;
+        }
     }
 
     private void newPosterTest() throws IOException {
-        // create an example file
         File file = new File("/Users/I567591/Downloads/9AD1CC86-C9EF-48C6-8083-E066B42BEAAD.jpg");
-
-        // create a new MultipartFile instance
         MultipartFile multipartFile = new MockMultipartFile("file", "9AD1CC86-C9EF-48C6-8083-E066B42BEAAD.jpg", "image/jpg", new FileInputStream(file));
-
-        // code to do something with the selected file
-        createPoster("mai1_poster", multipartFile, 1, 2);
+        createPoster("first poster",1,1,multipartFile);
     }
 
 //    @GetMapping("poster/{posterId}")
