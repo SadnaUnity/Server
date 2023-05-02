@@ -4,6 +4,7 @@ import com.example.server.Database;
 import com.example.server.ServerConstants;
 import com.example.server.entities.Room;
 import com.example.server.response.AvatarResponse;
+import com.example.server.response.PosterResponse;
 import com.example.server.response.Response;
 import com.example.server.response.RoomResponse;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -17,8 +18,6 @@ import java.sql.*;
 public class RoomController {
     Database connectionDBInstance;
     Connection connectionDB;
-    private String roomName;
-    private Integer userId;
 
     public RoomController() {
         connectionDBInstance = Database.getInstance();
@@ -51,11 +50,32 @@ public class RoomController {
         }
         try {
             Room room = getRoom(roomId);
-            return ResponseEntity.ok().body(new RoomResponse("Completed successfully", roomId, room));
+            return ResponseEntity.status(HttpStatus.OK).body(new RoomResponse("Completed successfully", roomId, room));
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new AvatarResponse(ServerConstants.UNEXPECTED_ERROR, userId, null));
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new RoomResponse(ServerConstants.UNEXPECTED_ERROR, roomId, null));
         }
     }
+
+    @PostMapping("/deleteRoom/{roomId}")
+    public ResponseEntity<Response> deleteRoom(@PathVariable("roomId") Integer roomId) { //delete all posters !!!!
+        if (!connectionDBInstance.isValueExist(ServerConstants.ROOMS_TABLE, "room_id", roomId)) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new RoomResponse(String.format(ServerConstants.ROOM_ID_NOT_EXISTS, roomId), null, null));
+        }
+        try {
+            String sql = "DELETE FROM rooms WHERE room_id = ?";
+            PreparedStatement pstmt = connectionDB.prepareStatement(sql);
+            pstmt.setInt(1, roomId);
+            int rowsDeleted = pstmt.executeUpdate();
+            if (rowsDeleted == 0) {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new RoomResponse(String.format(ServerConstants.UNEXPECTED_ERROR, roomId), roomId, null));
+            } else {
+                return ResponseEntity.status(HttpStatus.OK).body(new RoomResponse(String.format(ServerConstants.ROOM_DELETED_SUCCESSFULLY, roomId), roomId, null));
+            }
+        } catch (SQLException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new RoomResponse(String.format(ServerConstants.UNEXPECTED_ERROR, roomId), roomId, null));
+        }
+    }
+
 
     public Room getRoom(Integer roomId) {
         try {
