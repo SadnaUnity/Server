@@ -278,9 +278,9 @@ Content-Type: application/json</code>
 
 ```json
 {
-"message": "Poster: '1' deleted successfully",
-"posterId": 1,
-"poster": null
+  "message": "Poster: '1' deleted successfully",
+  "posterId": 1,
+  "poster": null
 }
 ```
 
