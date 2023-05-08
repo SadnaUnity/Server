@@ -346,4 +346,71 @@ body:
 }
 ```
 
+---
+
+## `/getIntoRoom`
+This endpoint is used to move a user into a specific room.
+**URL:** `/getIntoRoom`
+
+**Method:** `POST`
+
+**Request Parameters:**
+
+| Field       | Type | Required | Description                              |
+| ----------- |------| -------- |------------------------------------------|
+| roomId     | int  | Yes      | An integer parameter representing the ID of the room the user wants to join |
+| userId       | int  | Yes      |An integer parameter representing the ID of the user.                |
+
+
+**Example Request:**
+
+POST /getIntoRoom?roomId=1&userId=1
+
+**Example Response(HTTP 200 OK):**
+ ```json
+  {
+    "message": "User 456 changed room successfully to Room 123",
+    "roomId": 123,
+    "roomInfo": {
+      "name": "Example Room",
+      "capacity": 10
+    }
+  }
+  ```
+  
+---
+## `/getOutFromRoom`
+
+This endpoint is used to move a user out of the current room.
+
+**URL:** `/getOutFromRoom`
+
+**Method:** `POST`
+
+**Request Parameters:**
+
+| Field       | Type | Required | Description                              |
+| ----------- |------| -------- |------------------------------------------|
+| userId       | int  | Yes      |An integer parameter representing the ID of the user.                |
+
+**Example Request:**
+
+POST /getOutFromRoom?userId=1
+
+**Example Response(HTTP 200 OK):**
+ ```json
+  {
+    "message": "User 456 changed room successfully to Room 123",
+    "roomId": 123,
+    "roomInfo": {
+      "name": "Example Room",
+      "capacity": 10
+    }
+  }
+  ```
+  
+---
+
+
+
 
