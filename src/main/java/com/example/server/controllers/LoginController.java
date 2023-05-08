@@ -33,7 +33,7 @@ public class LoginController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<Response> register(@RequestParam String username, @RequestParam String password) {
+    public ResponseEntity<Response> register(@RequestParam String username, @RequestParam String password, @RequestParam String avatarColor, @RequestParam String avatarAccessory) {
         if (connectionDBInstance.isValueExist(ServerConstants.USERS_TABLE,"username",username)) {
             return ResponseEntity.status(ServerConstants.BAD_REQUEST_RESPONSE_CODE).body(new LoginResponse(String.format(ServerConstants.USER_EXISTS, username),null, null,null, null));
         } else if (!isValidUserName(username) || !isValidPassword(password)) {
@@ -42,11 +42,11 @@ public class LoginController {
         Avatar avatar = null;
         Integer user_id = createNewUserInSystem(username, password);
         if (user_id != 0) {
-            avatar = avatarController.addNewAvatarToSystem(user_id, null, null, null);
+            avatar = avatarController.addNewAvatarToSystem(user_id, username, Avatar.Color.values()[Integer.parseInt(avatarColor)], Avatar.Accessory.values()[Integer.parseInt(avatarAccessory)]);
         }
         HttpStatus status = user_id != null ? HttpStatus.OK : HttpStatus.INTERNAL_SERVER_ERROR;
         String message = user_id != null ? String.format(ServerConstants.USER_CREATED_SUCCESSFULLY, username) : ServerConstants.UNEXPECTED_ERROR;
-        return ResponseEntity.status(status).body(new LoginResponse(message, user_id,username, avatar.getAvatarId(), null));
+        return ResponseEntity.status(status).body(new LoginResponse(message, user_id,username, avatar.getAvatarId(), avatar));
     }
 
 

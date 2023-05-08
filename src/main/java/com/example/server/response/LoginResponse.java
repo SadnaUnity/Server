@@ -14,7 +14,7 @@ public class LoginResponse implements Response {
         this.message = message;
         this.userId = user_id;
         this.avatar = avatar;
-        this.username=username;
+        this.username = username;
     }
 
     public Avatar getAvatar() {
@@ -27,6 +27,10 @@ public class LoginResponse implements Response {
 
     public Integer getUserId() {
         return userId;
+    }
+
+    public String getUsername() {
+        return username;
     }
 
     public void setUserId(Integer userId) {

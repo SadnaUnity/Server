@@ -13,11 +13,15 @@ public class Avatar {
 
     public Avatar(Accessory accessory, Color color, String name, Integer avatarId) {
         this.accessory = (accessory != null) ? accessory : Accessory.EMPTY;
-        this.color = (color != null) ? color : Color.RED;;
+        this.color = (color != null) ? color : Color.PINK;;
         this.avatarId = avatarId;
     }
     public Integer getAvatarId() {
         return avatarId;
+    }
+
+    public void setAvatarId(Integer avatarId) {
+        this.avatarId = avatarId;
     }
 
     // Getters and setters
