@@ -6,13 +6,15 @@ public class LoginResponse implements Response {
     private Integer userId;
     private String message;
     private Avatar avatar;
+    private String username;
 
     public LoginResponse(){}
 
-    public LoginResponse(String message, Integer userId, Avatar avatar) {
+    public LoginResponse(String message, Integer user_id, String username, Integer avatar_id, Avatar avatar) {
         this.message = message;
-        this.userId = userId;
+        this.userId = user_id;
         this.avatar = avatar;
+        this.username=username;
     }
 
     public Avatar getAvatar() {
@@ -27,7 +29,7 @@ public class LoginResponse implements Response {
         return userId;
     }
 
-    public void setUser_id(Integer userId) {
+    public void setUserId(Integer userId) {
         this.userId = userId;
     }
 

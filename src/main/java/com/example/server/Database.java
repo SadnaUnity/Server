@@ -5,15 +5,11 @@ import java.sql.*;
 public class Database {
     private static Connection connectionDB;
     private static Database instance = null;
-    private String databaseName = "sadna_db";
-    private String dbUsername = "root";
-    private String dbPassword = "Chxkhcmk69";
-    private String dbHostAddress = "34.165.195.48";
-    private String dbHostPort = "3306";
+
     private Database() {
-        String jdbcUrl = "jdbc:mysql://" + dbHostAddress + ":" + dbHostPort + "/" + databaseName;
+        String jdbcUrl = "jdbc:mysql://" + ServerConstants.DB_HOST + ":" + ServerConstants.DB_HOST_PORT + "/" + ServerConstants.DATABASE_NAME;
         try {
-            connectionDB = DriverManager.getConnection(jdbcUrl, dbUsername, dbPassword);
+            connectionDB = DriverManager.getConnection(jdbcUrl, ServerConstants.DB_USER_NAME, ServerConstants.DB_PASSWORD);
             //TODO: connectionDB.close();
         } catch (SQLException e) {
             System.out.println("Error creating database connection: " + e.getMessage());
@@ -30,16 +26,18 @@ public class Database {
         return connectionDB;
     }
 
-    public boolean isRoomIdExist(Integer roomId){
-        boolean roomExist = false;
+    public boolean isValueExist(String tableName, String columnName, Object value) {
+        boolean entityIdExists = false;
         try {
-            String sql = "SELECT room_id FROM rooms"; //Prepare the SQL statement
+            String sql = "SELECT " + columnName + " FROM " + tableName;
             Statement statement = connectionDB.createStatement();
-            ResultSet dbResponse = statement.executeQuery(sql); // Execute the SQL statement and get the results
+            ResultSet dbResponse = statement.executeQuery(sql);
 
             while (dbResponse.next()) {
-                if (dbResponse.getInt("room_id")==roomId) {
-                    roomExist = true;
+                System.out.println(dbResponse.getObject(columnName));
+                Object dbValue = dbResponse.getObject(columnName);
+                if (dbValue != null && dbValue.equals(value)) {
+                    entityIdExists = true;
                     break;
                 }
             }
@@ -49,121 +47,103 @@ public class Database {
         } catch (SQLException e) {
             System.out.println("Error: " + e.getMessage());
         }
-        return roomExist;
+        return entityIdExists;
     }
-    public boolean isPosterIdExist(Integer posterId){
-        boolean posterExist = false;
+
+    public Integer checkValidUserDetailsLogin(String username, String password) {
+        Integer user_id = 0;
+        boolean userFound = false;
         try {
-            String sql = "SELECT poster_id FROM posters"; //Prepare the SQL statement
+            String sql = "SELECT * FROM users"; //Prepare the SQL statement
             Statement statement = connectionDB.createStatement();
             ResultSet dbResponse = statement.executeQuery(sql); // Execute the SQL statement and get the results
 
-            while (dbResponse.next()) {
-                if (dbResponse.getInt("poster_id")==posterId) {
-                    posterExist = true;
-                    break;
-                }
-            }
-
-            dbResponse.close();
-            statement.close();
-        } catch (SQLException e) {
-            System.out.println("Error: " + e.getMessage());
-        }
-        return posterExist;
-    }
-
-    public boolean isRoomNameExist(String roomName) {
-        boolean roomExist = false;
-        try {
-            String sql = "SELECT room_name FROM rooms"; //Prepare the SQL statement
-            Statement statement = connectionDB.createStatement();
-            ResultSet dbResponse = statement.executeQuery(sql); // Execute the SQL statement and get the results
-
-            while (dbResponse.next()) {
-                System.out.println(dbResponse.getString("room_name"));
-                if (dbResponse.getString("room_name").equals(roomName)) {
-                    roomExist = true;
-                    break;
-                }
-            }
-
-            dbResponse.close();
-            statement.close();
-        } catch (SQLException e) {
-            System.out.println("Error: " + e.getMessage());
-        }
-        return roomExist;
-    }
-
-    public boolean isPosterNameExist(String posterName) {
-        boolean posterExist = false;
-        try {
-            String sql = "SELECT poster_name FROM posters"; //Prepare the SQL statement
-            Statement statement = connectionDB.createStatement();
-            ResultSet dbResponse = statement.executeQuery(sql); // Execute the SQL statement and get the results
-
-            while (dbResponse.next()) {
-                System.out.println(dbResponse.getString("poster_name"));
-                if (dbResponse.getString("poster_name").equals(posterName)) {
-                    posterExist = true;
-                    break;
-                }
-            }
-
-            dbResponse.close();
-            statement.close();
-        } catch (SQLException e) {
-            System.out.println("Error: " + e.getMessage());
-        }
-        return posterExist;
-    }
-
-    public boolean isUsernameExist(String username) {
-        boolean userExist = false;
-        try {
-            String sql = "SELECT username FROM users"; //Prepare the SQL statement
-            Statement statement = connectionDB.createStatement();
-            ResultSet dbResponse = statement.executeQuery(sql); // Execute the SQL statement and get the results
-
-            while (dbResponse.next()) {
-                if (dbResponse.getString("username").equals(username)) {
-                    userExist = true;
-                    break;
-                }
-            }
-
-            dbResponse.close();
-            statement.close();
-        } catch (SQLException e) {
-            System.out.println("Error: " + e.getMessage());
-        } finally {
-            return userExist;
-        }
-    }
-    public boolean isUserIdExist(Integer userId) {
-        boolean userExist = false;
-        try {
-            String sql = "SELECT user_id FROM users"; //Prepare the SQL statement
-            Statement statement = connectionDB.createStatement();
-            ResultSet dbResponse = statement.executeQuery(sql); // Execute the SQL statement and get the results
-
-            while (dbResponse.next()) {
+            while (!userFound && dbResponse.next()) {
+                System.out.println(dbResponse.getString("username"));
+                System.out.println(dbResponse.getString("password"));
                 System.out.println(dbResponse.getString("user_id"));
-                if (dbResponse.getInt("user_id")==userId) {
-                    userExist = true;
-                    break;
+                if (dbResponse.getString("username").equals(username) && dbResponse.getString("password").equals(password)) {
+                    user_id = dbResponse.getInt("user_id");
+                    userFound = true;
                 }
             }
-
             dbResponse.close();
             statement.close();
         } catch (SQLException e) {
             System.out.println("Error: " + e.getMessage());
         } finally {
-            return userExist;
+            return user_id;
         }
     }
+
+//    public boolean isRoomNameExist(String roomName) {
+//        boolean roomExist = false;
+//        try {
+//            String sql = "SELECT room_name FROM rooms"; //Prepare the SQL statement
+//            Statement statement = connectionDB.createStatement();
+//            ResultSet dbResponse = statement.executeQuery(sql); // Execute the SQL statement and get the results
+//
+//            while (dbResponse.next()) {
+//                System.out.println(dbResponse.getString("room_name"));
+//                if (dbResponse.getString("room_name").equals(roomName)) {
+//                    roomExist = true;
+//                    break;
+//                }
+//            }
+//
+//            dbResponse.close();
+//            statement.close();
+//        } catch (SQLException e) {
+//            System.out.println("Error: " + e.getMessage());
+//        }
+//        return roomExist;
+//    }
+//
+//    public boolean isPosterNameExist(String posterName) {
+//        boolean posterExist = false;
+//        try {
+//            String sql = "SELECT poster_name FROM posters"; //Prepare the SQL statement
+//            Statement statement = connectionDB.createStatement();
+//            ResultSet dbResponse = statement.executeQuery(sql); // Execute the SQL statement and get the results
+//
+//            while (dbResponse.next()) {
+//                System.out.println(dbResponse.getString("poster_name"));
+//                if (dbResponse.getString("poster_name").equals(posterName)) {
+//                    posterExist = true;
+//                    break;
+//                }
+//            }
+//
+//            dbResponse.close();
+//            statement.close();
+//        } catch (SQLException e) {
+//            System.out.println("Error: " + e.getMessage());
+//        }
+//        return posterExist;
+//    }
+//
+//    public boolean isUsernameExist(String username) {
+//        boolean userExist = false;
+//        try {
+//            String sql = "SELECT username FROM users"; //Prepare the SQL statement
+//            Statement statement = connectionDB.createStatement();
+//            ResultSet dbResponse = statement.executeQuery(sql); // Execute the SQL statement and get the results
+//
+//            while (dbResponse.next()) {
+//                if (dbResponse.getString("username").equals(username)) {
+//                    userExist = true;
+//                    break;
+//                }
+//            }
+//
+//            dbResponse.close();
+//            statement.close();
+//        } catch (SQLException e) {
+//            System.out.println("Error: " + e.getMessage());
+//        } finally {
+//            return userExist;
+//        }
+//    }
 
     public void createTables(){
         //ROOM

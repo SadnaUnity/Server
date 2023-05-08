@@ -7,11 +7,17 @@ import java.util.stream.Collectors;
 public class Avatar {
     private Accessory accessory;
     private Color color;
+    private Integer avatarId;
 
     public Avatar(){}
-    public Avatar(Accessory accessory, Color color, String name) {
-        this.accessory = accessory;
-        this.color = color;
+
+    public Avatar(Accessory accessory, Color color, String name, Integer avatarId) {
+        this.accessory = (accessory != null) ? accessory : Accessory.EMPTY;
+        this.color = (color != null) ? color : Color.RED;;
+        this.avatarId = avatarId;
+    }
+    public Integer getAvatarId() {
+        return avatarId;
     }
 
     // Getters and setters
@@ -33,7 +39,11 @@ public class Avatar {
 
     // Accessory enum
     public enum Accessory {
-        HEART_GLASSES, SANTA_HAT, NORMAL_GLASSES, COOK_HAT, EMPTY
+        HEART_GLASSES,
+        SANTA_HAT,
+        NORMAL_GLASSES,
+        COOK_HAT,
+        EMPTY
     }
 
     // Color enum
