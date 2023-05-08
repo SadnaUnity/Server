@@ -19,8 +19,6 @@ public class MovingController {
     public MovingController()
     {
         positions = new HashMap<Integer, PlayerResponse>();
-        /*positions.put(1, new PlayerResponse(new LoginResponse(ServerConstants.POS_EXCEPTED, 1, new Avatar(Avatar.Accessory.SANTA_HAT, Avatar.Color.GREEN, "1")),
-            new Position(1,1,1)));*/
     }
     @PostMapping("/updatePosition")
     public ResponseEntity<String> updatePosition(@RequestBody PlayerResponse posData) {
