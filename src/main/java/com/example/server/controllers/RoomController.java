@@ -3,8 +3,6 @@ package com.example.server.controllers;
 import com.example.server.Database;
 import com.example.server.ServerConstants;
 import com.example.server.entities.Room;
-import com.example.server.response.AvatarResponse;
-import com.example.server.response.PosterResponse;
 import com.example.server.response.Response;
 import com.example.server.response.RoomResponse;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -20,8 +18,8 @@ import java.util.*;
 public class RoomController {
     Database connectionDBInstance;
     Connection connectionDB;
-    Map<Integer, Set<Integer>> roomParticipants ;
-    //TODO: ADD avatar to room map
+    Map<Integer, Set<Integer>> roomParticipants ; // ROOM ID 1 is default room
+
     public RoomController() {
         connectionDBInstance = Database.getInstance();
         connectionDB = connectionDBInstance.getConnection();
@@ -29,9 +27,8 @@ public class RoomController {
         Set<Integer> users = new HashSet<>();
         users.add(1);
         users.add(2);
-        roomParticipants.put(1, users);
-        roomParticipants.put(3, new HashSet<>(Collections.singletonList(3)));
-
+        roomParticipants.put(ServerConstants.DEFAULT_ROOM, new HashSet<>());
+        roomParticipants.put(3, users);
     }
     @PostMapping("/room")
     public ResponseEntity<Response> createRoom(@RequestParam String roomName,  @RequestBody Room userRequestRoom) {
@@ -49,6 +46,27 @@ public class RoomController {
             return ResponseEntity.status(HttpStatus.OK).body(new RoomResponse(String.format(ServerConstants.ROOM_CREATED_SUCCESSFULLY, roomName), room.getRoomId(), room));
         } else {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new RoomResponse(ServerConstants.UNEXPECTED_ERROR, null, room));
+        }
+    }
+
+    @PostMapping("/getIntoRoom")
+    public ResponseEntity<Response> getIntoRoom(@RequestParam Integer roomId,  @RequestParam Integer userId) {
+        try {
+            removeUserFromRoom(userId,ServerConstants.DEFAULT_ROOM);
+            addUserToRoom(userId,roomId);
+            return ResponseEntity.status(HttpStatus.OK).body(new RoomResponse(String.format(ServerConstants.USER_CHANGED_ROOM_SUCCESSFULLY, userId,roomId), roomId, getRoom(roomId)));
+        } catch (Exception err){
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new RoomResponse(ServerConstants.UNEXPECTED_ERROR, 1, getRoom(ServerConstants.DEFAULT_ROOM)));
+        }
+    }
+    @PostMapping("/getOutFromRoom")
+    public ResponseEntity<Response> removeUserFromRoom(@RequestParam Integer userId) {
+        try {
+            removeUserFromRoom(userId,null);
+            addUserToRoom(userId,ServerConstants.DEFAULT_ROOM);
+            return ResponseEntity.status(HttpStatus.OK).body(new RoomResponse(String.format(ServerConstants.USER_CHANGED_ROOM_SUCCESSFULLY, userId,1), 1, getRoom(ServerConstants.DEFAULT_ROOM)));
+        } catch (Exception err){
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new RoomResponse(ServerConstants.UNEXPECTED_ERROR, null, null));
         }
     }
     @GetMapping("/room/{roomId}")
@@ -128,7 +146,6 @@ public class RoomController {
             return room;
         }
     }
-
     public Integer getRoomId(Integer userId) {
         for (Map.Entry<Integer, Set<Integer>> entry : roomParticipants.entrySet()) {
             if (entry.getValue().contains(userId)) {
@@ -138,4 +155,34 @@ public class RoomController {
         return null;
     }
 
+    public void addUserToRoom(Integer userId, Integer roomId) {
+        try {
+            Set<Integer> room = roomParticipants.get(roomId);
+            room.add(userId);
+        } catch (Exception err) {
+            throw err;
+        }
+    }
+    public void removeUserFromRoom(Integer userId, Integer roomId) throws Exception {
+        try {
+            if (roomId == null) {
+                for (Map.Entry<Integer, Set<Integer>> entry : roomParticipants.entrySet()) {
+                    Set<Integer> participants = entry.getValue();
+                    if (participants.contains(userId)) {
+                        participants.remove(userId);
+                        roomId = entry.getKey();
+                        break;
+                    }
+                }
+                if (roomId == null) {
+                    throw new Exception("failed to get out from room!");
+                }
+            } else {
+                Set<Integer> room = roomParticipants.get(roomId);
+                room.remove(userId);
+            }
+        } catch (Exception err) {
+            throw err;
+        }
+    }
 }
