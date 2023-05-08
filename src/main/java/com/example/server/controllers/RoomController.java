@@ -13,17 +13,26 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.sql.*;
+import java.util.*;
 
 @RestController
+@Singleton
 public class RoomController {
     Database connectionDBInstance;
     Connection connectionDB;
-
+    Map<Integer, Set<Integer>> roomParticipants ;
+    //TODO: ADD avatar to room map
     public RoomController() {
         connectionDBInstance = Database.getInstance();
         connectionDB = connectionDBInstance.getConnection();
-    }
+        roomParticipants = new HashMap<>();
+        Set<Integer> users = new HashSet<>();
+        users.add(1);
+        users.add(2);
+        roomParticipants.put(1, users);
+        roomParticipants.put(3, new HashSet<>(Collections.singletonList(3)));
 
+    }
     @PostMapping("/room")
     public ResponseEntity<Response> createRoom(@RequestParam String roomName,  @RequestBody Room userRequestRoom) {
         int maxCapacity = userRequestRoom.getMaxCapacity();
@@ -42,7 +51,6 @@ public class RoomController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new RoomResponse(ServerConstants.UNEXPECTED_ERROR, null, room));
         }
     }
-
     @GetMapping("/room/{roomId}")
     public ResponseEntity<Response> getRoomByRoomId(@PathVariable Integer roomId) {
         if (!connectionDBInstance.isValueExist(ServerConstants.ROOMS_TABLE,"room_id",roomId)) {
@@ -55,7 +63,6 @@ public class RoomController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new RoomResponse(ServerConstants.UNEXPECTED_ERROR, roomId, null));
         }
     }
-
     @PostMapping("/deleteRoom/{roomId}")
     public ResponseEntity<Response> deleteRoom(@PathVariable("roomId") Integer roomId) { //delete all posters !!!!
         if (!connectionDBInstance.isValueExist(ServerConstants.ROOMS_TABLE, "room_id", roomId)) {
@@ -75,8 +82,6 @@ public class RoomController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new RoomResponse(String.format(ServerConstants.UNEXPECTED_ERROR, roomId), roomId, null));
         }
     }
-
-
     public Room getRoom(Integer roomId) {
         try {
             PreparedStatement stmt = connectionDB.prepareStatement("SELECT * FROM rooms WHERE room_id = ?");
@@ -95,7 +100,6 @@ public class RoomController {
             return null;
         }
     }
-
     public Room addNewRoomToDB(String roomName, Integer managerId, boolean privacy, int maxCapacity){
         String insertSql = "INSERT INTO rooms (manager_id, room_name, privacy, max_capacity) VALUES (?,?,?,?)";
         Integer roomId = null;
@@ -125,46 +129,13 @@ public class RoomController {
         }
     }
 
-
-
-//    @PostMapping("/rooms/{roomId}/users")
-//    public String processRequest(@QueryParam("param1") String param1, @QueryParam("param2") int param2, String rawData) {
-//        // Parse the raw JSON data into a JsonNode object using Jackson
-//        ObjectMapper objectMapper = new ObjectMapper();
-//        JsonNode jsonNode = objectMapper.readTree(rawData);
-//
-//        // Extract parameters from the JSON data
-//        String jsonParam1 = jsonNode.get("jsonParam1").asText();
-//        int jsonParam2 = jsonNode.get("jsonParam2").asInt();
-//
-//        // Process the request using all parameters
-//        return "Request processed successfully";
-//    }
-
-//    private boolean addUserToRoomDB(Integer roomId, Integer userId){
-//        // SQL query to insert a new row
-//        String tableName = "room_id_"+roomId;
-//        String sql = "INSERT INTO "+tableName+" (column1, column2, column3) VALUES (?, ?, ?)";
-//
-//        try (Connection conn = DriverManager.getConnection(url, username, password);
-//             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-//
-//            // Set the values of the columns for the new row
-//            pstmt.setString(1, "value1");
-//            pstmt.setInt(2, 123);
-//            pstmt.setBoolean(3, true);
-//
-//            // Execute the SQL query
-//            int rowsInserted = pstmt.executeUpdate();
-//
-//            if (rowsInserted > 0) {
-//                System.out.println("A new row has been added to the table.");
-//            } else {
-//                System.out.println("No rows have been added to the table.");
-//            }
-//        } catch (SQLException e) {
-//            System.out.println("Error executing SQL query: " + e.getMessage());
-//        }
-//    }
+    public Integer getRoomId(Integer userId) {
+        for (Map.Entry<Integer, Set<Integer>> entry : roomParticipants.entrySet()) {
+            if (entry.getValue().contains(userId)) {
+                return entry.getKey();
+            }
+        }
+        return null;
+    }
 
 }
