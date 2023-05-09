@@ -253,7 +253,7 @@ Content-Type: application/json</code>
   "message": "Poster: 'poster4' created successfully",
   "posterId": 1,
   "poster": {
-    "fileUrl": "https://storage.googleapis.com/download/storage/v1/b/posters-sadna/o/6d141abe-2a18-47a7-85b5-0bd20a7f888c?generation=1683031052559941&alt=media",
+    "fileUrl": "https://storage.googleapis.com/download/storage/v1/b/posters-sadna/o/posterId",
     "roomId": 1,
     "userId": 1,
     "posterId": 5
@@ -450,18 +450,32 @@ GET /getPositions?userId={userId}
  ```json
 {
   "message": "Avatars data",
-  "avatarPositions": {
-    "com.example.server.entities.Avatar@3508e03": {
-      "id": 1,
-      "x": 2.0,
-      "y": 3.0
+  "avatarPositions": [
+    {
+      "avatar": {
+        "accessory": "EMPTY",
+        "color": "YELLOW",
+        "avatarId": 1
+      },
+      "position": {
+        "id": 1,
+        "x": 2.0,
+        "y": 3.0
+      }
     },
-    "com.example.server.entities.Avatar@7035dcf6": {
-      "id": 3,
-      "x": 2.0,
-      "y": 3.0
+    {
+      "avatar": {
+        "accessory": "EMPTY",
+        "color": "RED",
+        "avatarId": 3
+      },
+      "position": {
+        "id": 3,
+        "x": 2.0,
+        "y": 3.0
+      }
     }
-  }
+  ]
 }
   ```
 
