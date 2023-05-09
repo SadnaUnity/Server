@@ -185,4 +185,7 @@ public class RoomController {
             throw err;
         }
     }
+
+    get all rooms
+    get all avatars in room
 }
