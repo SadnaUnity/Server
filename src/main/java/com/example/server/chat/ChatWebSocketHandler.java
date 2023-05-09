@@ -27,7 +27,7 @@ public class ChatWebSocketHandler implements WebSocketHandler {
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
         Integer userId = Integer.valueOf(session.getHandshakeHeaders().get("userID").get(0));
-        Integer roomId = roomController.getRoomId(userId);
+        Integer roomId = roomController.findRoomIdByUserId(userId);
 
         // Add the session to the corresponding room sockets list
         List<WebSocketSession> roomSocketsList = roomSockets.getOrDefault(roomId, new ArrayList<>());

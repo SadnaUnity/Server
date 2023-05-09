@@ -43,7 +43,7 @@ public class LoginController {
         Avatar avatar = null;
         Integer userId = createNewUserInSystem(username, password);
         if (userId != 0) {
-            avatar = avatarController.addNewAvatarToSystem(userId, null, null, null);
+            avatar = avatarController.addNewAvatarToSystem(userId, null, null);
             roomController.addUserToRoom(userId,ServerConstants.DEFAULT_ROOM);
         }
         HttpStatus status = userId != null ? HttpStatus.OK : HttpStatus.INTERNAL_SERVER_ERROR;
