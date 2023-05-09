@@ -1,13 +1,6 @@
 package com.example.server.response;
-
-import ch.qos.logback.core.joran.sanity.Pair;
-import com.example.server.entities.Avatar;
 import com.example.server.entities.AvatarPosition;
-import com.example.server.entities.Position;
-
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 public class PositionsResponse implements Response {
     private String message;
