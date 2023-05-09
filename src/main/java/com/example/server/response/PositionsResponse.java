@@ -5,7 +5,7 @@ import com.example.server.entities.Position;
 
 import java.util.Map;
 
-public class PositionsResponse implements Response{
+public class PositionsResponse implements Response {
     private String message;
     private Map<Avatar,Position> avatarPositions;
 

@@ -260,9 +260,7 @@ Content-Type: application/json</code>
   }
 }
 ```
-
 ---
-
 ## Delete Poster
 
 This endpoint allows a user to delete a specific poster from the database.
@@ -298,9 +296,7 @@ Content-Type: application/json</code>
   "poster": null
 }
 ```
-
 ---
-
 ## Room
 
 This endpoint creates new room.
@@ -318,7 +314,6 @@ This endpoint creates new room.
 | maxCapacity       | int | No      | Max users in the room in the same time.  Default: 10 |
 | privacy       | boolean | No      | Indicates whether the room is private (TRUE) or public (FALSE). Default: False    |
 
-
 **Example Request:**  
 
 POST /room?roomName=maiRoom
@@ -330,7 +325,6 @@ body:
   "managerId":1
 }
 ```
-
 **Example Response:**  
 ```json
 {
@@ -345,7 +339,6 @@ body:
   }
 }
 ```
-
 ---
 
 ## `/getIntoRoom`
@@ -360,7 +353,6 @@ This endpoint is used to move a user into a specific room.
 | ----------- |------| -------- |------------------------------------------|
 | roomId     | int  | Yes      | An integer parameter representing the ID of the room the user wants to join |
 | userId       | int  | Yes      |An integer parameter representing the ID of the user.                |
-
 
 **Example Request:**
 
@@ -377,7 +369,7 @@ POST /getIntoRoom?roomId=1&userId=1
     }
   }
   ```
-  
+
 ---
 ## `/getOutFromRoom`
 
@@ -408,9 +400,69 @@ POST /getOutFromRoom?userId=1
     }
   }
   ```
-  
 ---
+## Get All Rooms
+
+Retrieves information about all rooms.
+
+**URL:** `/rooms`
+
+**Method:** `GET`
+
+**Request Parameters:** The endpoint does not require any request parameters.
+
+**Example Request:**
+
+GET /rooms
+
+**Example Response(HTTP 200 OK):**
+ ```json
+{
+  "message": "Message data",
+  "roomsData": {
+    "1": "mai's room",
+    "2": "shaked's room",
+    "3": "inbal's room"
+  }
+}
+  ```
+---
+## Get Positions
+
+Retrieves the positions of avatars in a room for a specific user.
+
+**URL:** `/getPositions`
+
+**Method:** `GET`
+
+**Request Parameters:**
+
+| Field       | Type | Required | Description                              |
+| ----------- |------| -------- |------------------------------------------|
+| userId       | int  | Yes      |An integer parameter representing the ID of the user.                |
 
 
+**Example Request:**
 
+GET /getPositions?userId={userId}
 
+**Example Response(HTTP 200 OK):**
+ ```json
+{
+  "message": "Avatars data",
+  "avatarPositions": {
+    "com.example.server.entities.Avatar@3508e03": {
+      "id": 1,
+      "x": 2.0,
+      "y": 3.0
+    },
+    "com.example.server.entities.Avatar@7035dcf6": {
+      "id": 3,
+      "x": 2.0,
+      "y": 3.0
+    }
+  }
+}
+  ```
+
+---
