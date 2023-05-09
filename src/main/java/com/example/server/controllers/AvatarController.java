@@ -45,7 +45,7 @@ public class AvatarController {
             return ResponseEntity.badRequest().body(new AvatarResponse(String.format(ServerConstants.AVATAR_NOT_EXISTS, avatarId), avatarId, null));
         }
         Map<String, Object> properties = new HashMap<>();
-        properties.put("avatar_name", userRequestAvatar.getName());
+        //properties.put("avatar_name", userRequestAvatar.getName());
         properties.put("color", userRequestAvatar.getColor());
         properties.put("accessory", userRequestAvatar.getAccessory());
         boolean avatarChanged = updateAvatarsTable(properties);
@@ -122,7 +122,7 @@ public class AvatarController {
         try {
             // Prepare the SQL statement with parameters
             accessory = (accessory != null) ? accessory : Avatar.Accessory.EMPTY;
-            color = (color != null) ? color : Avatar.Color.RED;
+            color = (color != null) ? color : Avatar.Color.PINK;
             avatarName = (avatarName != null) ? avatarName : "Avatar_" + userId;
             String sql = "INSERT INTO avatars (user_id, avatar_name,  accessory, color) VALUES (?, ?, ?, ?)";
             PreparedStatement statement = connectionDB.prepareStatement(sql);

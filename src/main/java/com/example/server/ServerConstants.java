@@ -39,4 +39,5 @@ public class ServerConstants {
     static final String DB_HOST = "34.165.195.48";
     static final String DB_HOST_PORT = "3306";
     public static final String BUCKET_NAME = "posters-sadna";
+    public static final String POS_EXCEPTED = "Pos excepted";
 }
