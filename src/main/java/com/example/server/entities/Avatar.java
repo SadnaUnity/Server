@@ -11,7 +11,7 @@ public class Avatar {
 
     public Avatar(){}
 
-    public Avatar(Accessory accessory, Color color, String name, Integer avatarId) {
+    public Avatar(Accessory accessory, Color color, Integer avatarId) {
         this.accessory = (accessory != null) ? accessory : Accessory.EMPTY;
         this.color = (color != null) ? color : Color.PINK;;
         this.avatarId = avatarId;
@@ -52,7 +52,7 @@ public class Avatar {
 
     // Color enum
     public enum Color {
-        PINK, BLUE, GREEN, YELLOW
+        PINK, BLUE, GREEN, YELLOW, RED
     }
 
 }

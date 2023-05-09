@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
+@Singleton
 public class AvatarController {
     Database connectionDBInstance;
     Connection connectionDB;
@@ -79,8 +80,7 @@ public class AvatarController {
             if (rs.next()) {
                 Avatar.Accessory accessory = Avatar.Accessory.valueOf((rs.getString("accessory")));
                 Avatar.Color color = Avatar.Color.valueOf(rs.getString("color"));
-                String name = rs.getString("avatar_name");
-                return new Avatar(accessory, color, name, avatarId);
+                return new Avatar(accessory, color, avatarId);
             } else {
                 return null;
             }
@@ -117,22 +117,20 @@ public class AvatarController {
         }
 
     }
-    public Avatar addNewAvatarToSystem(Integer userId, String avatarName, Avatar.Color color, Avatar.Accessory accessory) {
+    public Avatar addNewAvatarToSystem(Integer userId, Avatar.Color color, Avatar.Accessory accessory) {
         Avatar avatar = null;
         try {
             // Prepare the SQL statement with parameters
             accessory = (accessory != null) ? accessory : Avatar.Accessory.EMPTY;
             color = (color != null) ? color : Avatar.Color.PINK;
-            avatarName = (avatarName != null) ? avatarName : "Avatar_" + userId;
-            String sql = "INSERT INTO avatars (user_id, avatar_name,  accessory, color) VALUES (?, ?, ?, ?)";
+            String sql = "INSERT INTO avatars (user_id, accessory, color) VALUES (?, ?, ?, ?)";
             PreparedStatement statement = connectionDB.prepareStatement(sql);
             statement.setInt(1, userId);
-            statement.setString(2, avatarName);
-            statement.setString(3, String.valueOf(accessory));
-            statement.setString(4, String.valueOf(color));
+            statement.setString(2, String.valueOf(accessory));
+            statement.setString(3, String.valueOf(color));
             int rowsInserted = statement.executeUpdate();
             if (rowsInserted > 0) {
-                avatar = new Avatar(accessory, color, avatarName, userId);
+                avatar = new Avatar(accessory, color, userId);
             }
         } catch (SQLException e) {
             System.out.println(e.getMessage());

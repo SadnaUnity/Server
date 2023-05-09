@@ -5,6 +5,7 @@ import com.example.server.ServerConstants;
 import com.example.server.entities.Room;
 import com.example.server.response.Response;
 import com.example.server.response.RoomResponse;
+import com.example.server.response.AllRoomsResponse;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,10 +26,20 @@ public class RoomController {
         connectionDB = connectionDBInstance.getConnection();
         roomParticipants = new HashMap<>();
         Set<Integer> users = new HashSet<>();
+        Set<Integer> users2 = new HashSet<>();
+        Set<Integer> users3 = new HashSet<>();
         users.add(1);
         users.add(2);
-        roomParticipants.put(ServerConstants.DEFAULT_ROOM, new HashSet<>());
-        roomParticipants.put(3, users);
+        users.add(3);
+        users2.add(4);
+        users2.add(5);
+        users2.add(6);
+        users3.add(7);
+        users3.add(8);
+        users3.add(9);
+        roomParticipants.put(ServerConstants.DEFAULT_ROOM, users);
+        roomParticipants.put(2, users2);
+        roomParticipants.put(3, users3);
     }
     @PostMapping("/room")
     public ResponseEntity<Response> createRoom(@RequestParam String roomName,  @RequestBody Room userRequestRoom) {
@@ -48,7 +59,6 @@ public class RoomController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new RoomResponse(ServerConstants.UNEXPECTED_ERROR, null, room));
         }
     }
-
     @PostMapping("/getIntoRoom")
     public ResponseEntity<Response> getIntoRoom(@RequestParam Integer roomId,  @RequestParam Integer userId) {
         try {
@@ -79,6 +89,22 @@ public class RoomController {
             return ResponseEntity.status(HttpStatus.OK).body(new RoomResponse("Completed successfully", roomId, room));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new RoomResponse(ServerConstants.UNEXPECTED_ERROR, roomId, null));
+        }
+    }
+    @GetMapping("/rooms")
+    public ResponseEntity<Response> getAllRooms() {
+        Map<Integer, String> roomMap = new HashMap<>();
+        try {
+            PreparedStatement stmt = connectionDB.prepareStatement("SELECT roomId, room_name FROM rooms");
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                Integer roomId = rs.getInt("roomId");
+                String roomName = rs.getString("room_name");
+                roomMap.put(roomId, roomName);
+            }
+            return ResponseEntity.status(HttpStatus.OK).body(new AllRoomsResponse(roomMap, "Message data"));
+        } catch (SQLException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new AllRoomsResponse(roomMap, "Message data"));
         }
     }
     @PostMapping("/deleteRoom/{roomId}")
@@ -146,7 +172,7 @@ public class RoomController {
             return room;
         }
     }
-    public Integer getRoomId(Integer userId) {
+    public Integer findRoomIdByUserId(Integer userId) {
         for (Map.Entry<Integer, Set<Integer>> entry : roomParticipants.entrySet()) {
             if (entry.getValue().contains(userId)) {
                 return entry.getKey();
@@ -154,7 +180,6 @@ public class RoomController {
         }
         return null;
     }
-
     public void addUserToRoom(Integer userId, Integer roomId) {
         try {
             Set<Integer> room = roomParticipants.get(roomId);
@@ -186,6 +211,5 @@ public class RoomController {
         }
     }
 
-    get all rooms
-    get all avatars in room
+//    get all avatars in room
 }
