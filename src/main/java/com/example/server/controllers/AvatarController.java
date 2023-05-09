@@ -74,7 +74,7 @@ public class AvatarController {
 
     public Avatar getAvatar(Integer avatarId){
         try {
-            PreparedStatement stmt = connectionDB.prepareStatement("SELECT * FROM avatars WHERE user_id = ?");
+            PreparedStatement stmt = connectionDB.prepareStatement("SELECT * FROM avatars WHERE avatar_id = ?");
             stmt.setInt(1, avatarId);
             ResultSet rs = stmt.executeQuery();
             if (rs.next()) {
