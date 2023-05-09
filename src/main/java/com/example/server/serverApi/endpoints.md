@@ -199,15 +199,15 @@ Content-Type: application/json</code>
 ```
 
 ---
-## Poster
+## Create a New Poster
 
-This endpoint allows a user to post a new poster in a room.
+This endpoint allows a user to create a new poster in a specified room.
 
 **URL:** `/poster`
 
 **Method:** `POST`
 
-**Request Body:**
+**Request Parameters:**
 
 The request should include a JSON object with the following keys:
 
@@ -216,9 +216,17 @@ The request should include a JSON object with the following keys:
 | userId     | int  | Yes      | The ID of the user posting.        |
 | roomId     | int  | Yes      | The ID of the room to post in.     |
 | posterName | string | Yes   | The name of the poster.            |
-| image       | file | Yes      | The image of the poster to post.   |
+
+Request Body:
+
+The request must include a file uploaded using multipart/form-data with the following keys:  
+
+| Field | Type | Required | Description                        |
+|-------|------| -------- | ---------------------------------- |
+| file  | File | Yes      | The image file of the new poster (maximum 10 MB).|
 
 **Example Request:**
+POST /poster?posterName=poster4&userId=1&roomId=1
 
 {
   "userId": 123,
@@ -231,20 +239,27 @@ The request should include a JSON object with the following keys:
 
 The response will include a JSON object with the following keys:
 
-| Field     | Type   | Description                        |
-| --------- | ------ | ---------------------------------- |
-| message   | string | Response message.                  |
-| userId   | int    | The ID of the user who posted.      |
-| posterId | int    | The ID of the posted poster.        |
-| roomId   | int    | The ID of the room where posted.    |
+| Field    | Type   | Description                        |
+|----------| ------ | ---------------------------------- |
+| message  | string | Response message.                  |
+| posterId | int    | The ID of the newly created poster.|
+| poster   | object    | The newly created poster object.|
 
 **Example Response:**  
+<code>HTTP/1.1 200 OK  
+Content-Type: application/json</code>
+```json
 {
-  "message": "Poster successfully posted.",
-  "user_id": 123,
-  "poster_id": 789,
-  "room_id": 456
+  "message": "Poster: 'poster4' created successfully",
+  "posterId": 1,
+  "poster": {
+    "fileUrl": "https://storage.googleapis.com/download/storage/v1/b/posters-sadna/o/6d141abe-2a18-47a7-85b5-0bd20a7f888c?generation=1683031052559941&alt=media",
+    "roomId": 1,
+    "userId": 1,
+    "posterId": 5
+  }
 }
+```
 
 ---
 
@@ -330,5 +345,72 @@ body:
   }
 }
 ```
+
+---
+
+## `/getIntoRoom`
+This endpoint is used to move a user into a specific room.
+**URL:** `/getIntoRoom`
+
+**Method:** `POST`
+
+**Request Parameters:**
+
+| Field       | Type | Required | Description                              |
+| ----------- |------| -------- |------------------------------------------|
+| roomId     | int  | Yes      | An integer parameter representing the ID of the room the user wants to join |
+| userId       | int  | Yes      |An integer parameter representing the ID of the user.                |
+
+
+**Example Request:**
+
+POST /getIntoRoom?roomId=1&userId=1
+
+**Example Response(HTTP 200 OK):**
+ ```json
+  {
+    "message": "User 456 changed room successfully to Room 123",
+    "roomId": 123,
+    "roomInfo": {
+      "name": "Example Room",
+      "capacity": 10
+    }
+  }
+  ```
+  
+---
+## `/getOutFromRoom`
+
+This endpoint is used to move a user out of the current room.
+
+**URL:** `/getOutFromRoom`
+
+**Method:** `POST`
+
+**Request Parameters:**
+
+| Field       | Type | Required | Description                              |
+| ----------- |------| -------- |------------------------------------------|
+| userId       | int  | Yes      |An integer parameter representing the ID of the user.                |
+
+**Example Request:**
+
+POST /getOutFromRoom?userId=1
+
+**Example Response(HTTP 200 OK):**
+ ```json
+  {
+    "message": "User 456 changed room successfully to Room 123",
+    "roomId": 123,
+    "roomInfo": {
+      "name": "Example Room",
+      "capacity": 10
+    }
+  }
+  ```
+  
+---
+
+
 
 

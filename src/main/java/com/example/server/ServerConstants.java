@@ -2,7 +2,7 @@ package com.example.server;
 import org.springframework.http.HttpStatus;
 
 public class ServerConstants {
-    public static final int BAD_REQUEST_RESPONSE_CODE = HttpStatus.BAD_REQUEST.value();
+    public static final int DEFAULT_ROOM = 1;
     public static final String USER_EXISTS = "Username '%s' already exists";
     public static final String ROOMS_TABLE = "rooms";
     public static final String USERS_TABLE = "users";
@@ -15,6 +15,7 @@ public class ServerConstants {
     public static final String USER_ID_NOT_EXISTS = "ERROR! User Id: '%s' isn't exist";
     public static final String AVATAR_NOT_EXISTS = "ERROR! Avatar for user id: '%s' isn't exist";
     public static final String ROOM_CREATED_SUCCESSFULLY = "Room: '%s' created successfully";
+    public static final String USER_CHANGED_ROOM_SUCCESSFULLY = "User Id: '%s' moved into room Id: '%s' successfully";
     public static final String AVATAR_CREATED_SUCCESSFULLY = "Avatar: '%s' created successfully";
     public static final String USER_CREATED_SUCCESSFULLY = "User: '%s' created successfully";
     public static final String POSTER_CREATED_SUCCESSFULLY = "Poster: '%s' created successfully";
