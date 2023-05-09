@@ -2,6 +2,7 @@ package com.example.server.controllers;
 
 import com.example.server.ServerConstants;
 import com.example.server.entities.Avatar;
+import com.example.server.entities.AvatarPosition;
 import com.example.server.entities.Position;
 import com.example.server.response.PositionsResponse;
 import com.example.server.response.Response;
@@ -9,9 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 @RestController
 public class MovingController {
@@ -29,11 +28,10 @@ public class MovingController {
     public ResponseEntity<String> updatePosition(@RequestBody Position posData) {
         positions.put(posData.getId(), posData);
         return ResponseEntity.status(HttpStatus.OK).body(ServerConstants.POSITION_UPDATED_SUCCESSFULLY);
-
     }
     @GetMapping("/getPositions")
     public ResponseEntity<Response> getPositions(@RequestParam Integer userId) {
-        Map<Avatar, Position> avatarPositionMap = new HashMap<>();
+        List<AvatarPosition> avatarPositionList = new ArrayList<>();
         try {
             Integer roomId = roomController.findRoomIdByUserId(userId);
             Set<Integer> allAvatarsInRoom = roomController.getAllUsersInRoom(roomId);
@@ -41,12 +39,12 @@ public class MovingController {
                 Avatar avatar = avatarController.getAvatar(avatarId);
                 Position position = getAvatarPosition(avatarId);
                 if (avatar != null && position != null) {
-                    avatarPositionMap.put(avatar, position);
+                    avatarPositionList.add(new AvatarPosition(avatar, position));
                 }
             }
-            return ResponseEntity.status(HttpStatus.OK).body(new PositionsResponse(avatarPositionMap, "Avatars data"));
+            return ResponseEntity.status(HttpStatus.OK).body(new PositionsResponse(avatarPositionList, "Avatars data"));
         } catch (Exception err) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new PositionsResponse(avatarPositionMap, ServerConstants.UNEXPECTED_ERROR));
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new PositionsResponse(avatarPositionList, ServerConstants.UNEXPECTED_ERROR));
         }
     }
     public Position getAvatarPosition(Integer avatarId){

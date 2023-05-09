@@ -10,7 +10,7 @@ public class LoginResponse implements Response {
 
     public LoginResponse(){}
 
-    public LoginResponse(String message, Integer user_id, String username, Integer avatar_id, Avatar avatar) {
+    public LoginResponse(String message, Integer user_id, String username, Avatar avatar) {
         this.message = message;
         this.userId = user_id;
         this.avatar = avatar;

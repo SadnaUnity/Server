@@ -28,17 +28,17 @@ public class LoginController {
         Integer userId = connectionDBInstance.checkValidUserDetailsLogin(username.trim(), password.trim());
         if (userId != 0) {
             roomController.addUserToRoom(userId,ServerConstants.DEFAULT_ROOM);
-            return ResponseEntity.status(HttpStatus.OK).body(new LoginResponse(ServerConstants.LOGIN_SUCCESSFULLY, userId,username,userId, avatarController.getAvatar(userId)));
+            return ResponseEntity.status(HttpStatus.OK).body(new LoginResponse(ServerConstants.LOGIN_SUCCESSFULLY, userId,username,avatarController.getAvatar(userId)));
         } else {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new LoginResponse(ServerConstants.INVALID_USERNAME_OR_PASSWORD, null,null, null,null));
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new LoginResponse(ServerConstants.INVALID_USERNAME_OR_PASSWORD, null,null, null));
         }
     }
     @PostMapping("/register")
     public ResponseEntity<Response> register(@RequestParam String username, @RequestParam String password) {
         if (connectionDBInstance.isValueExist(ServerConstants.USERS_TABLE,"username",username)) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new LoginResponse(String.format(ServerConstants.USER_EXISTS, username),null, null,null, null));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new LoginResponse(String.format(ServerConstants.USER_EXISTS, username),null, null, null));
         } else if (!isValidUserName(username) || !isValidPassword(password)) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new LoginResponse(ServerConstants.INVALID_USERNAME_OR_PASSWORD, null, null,null,null));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new LoginResponse(ServerConstants.INVALID_USERNAME_OR_PASSWORD, null, null,null));
         }
         Avatar avatar = null;
         Integer userId = createNewUserInSystem(username, password);
@@ -48,7 +48,7 @@ public class LoginController {
         }
         HttpStatus status = userId != null ? HttpStatus.OK : HttpStatus.INTERNAL_SERVER_ERROR;
         String message = userId != null ? String.format(ServerConstants.USER_CREATED_SUCCESSFULLY, username) : ServerConstants.UNEXPECTED_ERROR;
-        return ResponseEntity.status(status).body(new LoginResponse(message, userId,username, avatar.getAvatarId(), null));
+        return ResponseEntity.status(status).body(new LoginResponse(message, userId,username,  avatar));
     }
     private boolean isValidUserName(String userName) {
         if (userName == null || userName.trim().length() == 0) {

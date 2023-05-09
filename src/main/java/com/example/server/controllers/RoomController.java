@@ -19,7 +19,7 @@ import java.util.*;
 public class RoomController {
     Database connectionDBInstance;
     Connection connectionDB;
-    Map<Integer, Set<Integer>> roomParticipants ; // ROOM ID 1 is default room
+    Map<Integer, Set<Integer>> roomParticipants; // ROOM ID 1 is default room
 
     public RoomController() {
         connectionDBInstance = Database.getInstance();
@@ -41,15 +41,16 @@ public class RoomController {
         roomParticipants.put(2, users2);
         roomParticipants.put(3, users3);
     }
+
     @PostMapping("/room")
-    public ResponseEntity<Response> createRoom(@RequestParam String roomName,  @RequestBody Room userRequestRoom) {
+    public ResponseEntity<Response> createRoom(@RequestParam String roomName, @RequestBody Room userRequestRoom) {
         int maxCapacity = userRequestRoom.getMaxCapacity();
         boolean privacy = userRequestRoom.isPrivacy();
         int managerId = userRequestRoom.getManagerId();
-        if (connectionDBInstance.isValueExist(ServerConstants.ROOMS_TABLE,"room_name",roomName)) {
+        if (connectionDBInstance.isValueExist(ServerConstants.ROOMS_TABLE, "room_name", roomName)) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new RoomResponse(String.format(ServerConstants.ROOM_EXISTS, roomName), null, null));
         }
-        if (!connectionDBInstance.isValueExist(ServerConstants.USERS_TABLE,"user_id",managerId)) {
+        if (!connectionDBInstance.isValueExist(ServerConstants.USERS_TABLE, "user_id", managerId)) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new RoomResponse(String.format(ServerConstants.ROOM_EXISTS, roomName), null, null));
         }
         Room room = addNewRoomToDB(roomName, managerId, privacy, maxCapacity);
@@ -59,29 +60,30 @@ public class RoomController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new RoomResponse(ServerConstants.UNEXPECTED_ERROR, null, room));
         }
     }
+
     @PostMapping("/getIntoRoom")
-    public ResponseEntity<Response> getIntoRoom(@RequestParam Integer roomId,  @RequestParam Integer userId) {
+    public ResponseEntity<Response> getIntoRoom(@RequestParam Integer roomId, @RequestParam Integer userId) {
         try {
-            removeUserFromRoom(userId,ServerConstants.DEFAULT_ROOM);
-            addUserToRoom(userId,roomId);
-            return ResponseEntity.status(HttpStatus.OK).body(new RoomResponse(String.format(ServerConstants.USER_CHANGED_ROOM_SUCCESSFULLY, userId,roomId), roomId, getRoom(roomId)));
-        } catch (Exception err){
+            removeUserFromRoom(userId, ServerConstants.DEFAULT_ROOM);
+            addUserToRoom(userId, roomId);
+            return ResponseEntity.status(HttpStatus.OK).body(new RoomResponse(String.format(ServerConstants.USER_CHANGED_ROOM_SUCCESSFULLY, userId, roomId), roomId, getRoom(roomId)));
+        } catch (Exception err) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new RoomResponse(ServerConstants.UNEXPECTED_ERROR, 1, getRoom(ServerConstants.DEFAULT_ROOM)));
         }
     }
     @PostMapping("/getOutFromRoom")
     public ResponseEntity<Response> removeUserFromRoom(@RequestParam Integer userId) {
         try {
-            removeUserFromRoom(userId,null);
-            addUserToRoom(userId,ServerConstants.DEFAULT_ROOM);
-            return ResponseEntity.status(HttpStatus.OK).body(new RoomResponse(String.format(ServerConstants.USER_CHANGED_ROOM_SUCCESSFULLY, userId,1), 1, getRoom(ServerConstants.DEFAULT_ROOM)));
-        } catch (Exception err){
+            removeUserFromRoom(userId, null);
+            addUserToRoom(userId, ServerConstants.DEFAULT_ROOM);
+            return ResponseEntity.status(HttpStatus.OK).body(new RoomResponse(String.format(ServerConstants.USER_CHANGED_ROOM_SUCCESSFULLY, userId, 1), 1, getRoom(ServerConstants.DEFAULT_ROOM)));
+        } catch (Exception err) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new RoomResponse(ServerConstants.UNEXPECTED_ERROR, null, null));
         }
     }
     @GetMapping("/room/{roomId}")
     public ResponseEntity<Response> getRoomByRoomId(@PathVariable Integer roomId) {
-        if (!connectionDBInstance.isValueExist(ServerConstants.ROOMS_TABLE,"room_id",roomId)) {
+        if (!connectionDBInstance.isValueExist(ServerConstants.ROOMS_TABLE, "room_id", roomId)) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new RoomResponse(String.format(ServerConstants.ROOM_ID_NOT_EXISTS, roomId), null, null));
         }
         try {
@@ -95,17 +97,23 @@ public class RoomController {
     public ResponseEntity<Response> getAllRooms() {
         Map<Integer, String> roomMap = new HashMap<>();
         try {
-            PreparedStatement stmt = connectionDB.prepareStatement("SELECT roomId, room_name FROM rooms");
+            PreparedStatement stmt = connectionDB.prepareStatement("SELECT room_id, room_name FROM rooms");
             ResultSet rs = stmt.executeQuery();
             while (rs.next()) {
-                Integer roomId = rs.getInt("roomId");
+                Integer roomId = rs.getInt("room_id");
                 String roomName = rs.getString("room_name");
                 roomMap.put(roomId, roomName);
             }
             return ResponseEntity.status(HttpStatus.OK).body(new AllRoomsResponse(roomMap, "Message data"));
         } catch (SQLException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new AllRoomsResponse(roomMap, "Message data"));
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new AllRoomsResponse(roomMap, ServerConstants.UNEXPECTED_ERROR));
         }
+
+//        try {
+//            Room room = getRoom(roomId);
+//        } catch (Exception e) {
+//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new RoomResponse(ServerConstants.UNEXPECTED_ERROR, roomId, null));
+//        }
     }
     @PostMapping("/deleteRoom/{roomId}")
     public ResponseEntity<Response> deleteRoom(@PathVariable("roomId") Integer roomId) { //delete all posters !!!!
@@ -144,7 +152,7 @@ public class RoomController {
             return null;
         }
     }
-    public Room addNewRoomToDB(String roomName, Integer managerId, boolean privacy, int maxCapacity){
+    public Room addNewRoomToDB(String roomName, Integer managerId, boolean privacy, int maxCapacity) {
         String insertSql = "INSERT INTO rooms (manager_id, room_name, privacy, max_capacity) VALUES (?,?,?,?)";
         Integer roomId = null;
         Room room = null;
@@ -161,7 +169,7 @@ public class RoomController {
             ResultSet rs = stmt.getGeneratedKeys();
             if (rs.next()) {
                 roomId = rs.getInt(1);
-                room = new Room(privacy,managerId,maxCapacity,roomId,roomName);
+                room = new Room(privacy, managerId, maxCapacity, roomId, roomName);
             }
             stmt.close();
         } catch (SQLException e) {
@@ -210,6 +218,8 @@ public class RoomController {
             throw err;
         }
     }
-
+    public Set<Integer> getAllUsersInRoom(Integer roomId) {
+        return roomParticipants.get(roomId);
+    }
 //    get all avatars in room
 }
