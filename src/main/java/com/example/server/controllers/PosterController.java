@@ -6,17 +6,19 @@ import com.example.server.entities.Poster;
 import com.example.server.entities.Room;
 import com.example.server.response.PosterResponse;
 import com.example.server.response.Response;
+/*
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.cloud.storage.BlobId;
 import com.google.cloud.storage.BlobInfo;
 import com.google.cloud.storage.Storage;
 import com.google.cloud.storage.StorageOptions;
+*/
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import com.google.cloud.storage.Blob;
+//import com.google.cloud.storage.Blob;
 import java.io.*;
 import java.sql.*;
 import java.util.ArrayList;
@@ -31,8 +33,8 @@ import static com.example.server.response.Response.serverErrorResponse;
 public class PosterController {
     Database connectionDBInstance;
     Connection connectionDB;
-    Storage gcpStorage;
-    public PosterController() {
+    //Storage gcpStorage;
+    /*public PosterController() {
         try {
             connectionDBInstance = Database.getInstance();
             connectionDB = connectionDBInstance.getConnection();
@@ -40,9 +42,9 @@ public class PosterController {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-    }
+    }*/
 
-    @PostMapping("/poster")
+    /*@PostMapping("/poster")
     public ResponseEntity<Response> createPoster(@RequestParam String posterName, @RequestParam Integer roomId, @RequestParam Integer userId, @RequestPart MultipartFile file) {
         if (file.isEmpty()) {
             return badRequestResponse(ServerConstants.IMAGE_EMPTY);
@@ -72,6 +74,7 @@ public class PosterController {
             return serverErrorResponse(ServerConstants.FILE_UPLOAD_FAILED, userId, null);
         }
     }
+   */
     @GetMapping("poster/{posterId}")
     public ResponseEntity<PosterResponse> returnPosterData(@PathVariable Integer posterId) {
         if (!connectionDBInstance.isValueExist(ServerConstants.POSTERS_TABLE, "poster_id", posterId)) {
@@ -153,7 +156,7 @@ public class PosterController {
     private void newPosterTest() throws IOException {
         File file = new File("/Users/I567591/Downloads/9AD1CC86-C9EF-48C6-8083-E066B42BEAAD.jpg");
         MultipartFile multipartFile = new MockMultipartFile("file", "9AD1CC86-C9EF-48C6-8083-E066B42BEAAD.jpg", "image/jpg", new FileInputStream(file));
-        createPoster("first poster",1,1,multipartFile);
+        //createPoster("first poster",1,1,multipartFile);
     }
 
 

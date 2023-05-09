@@ -3,25 +3,18 @@ package com.example.server.response;
 import com.example.server.entities.Avatar;
 
 public class LoginResponse implements Response {
-    private Integer user_id;
-    private Integer avatar_id;
+    private Integer userId;
     private String message;
     private Avatar avatar;
     private String username;
+
+    public LoginResponse(){}
+
     public LoginResponse(String message, Integer user_id, String username, Integer avatar_id, Avatar avatar) {
         this.message = message;
-        this.user_id = user_id;
+        this.userId = user_id;
         this.avatar = avatar;
-        this.avatar_id=avatar_id;
-        this.username=username;
-    }
-
-    public Integer getAvatar_id() {
-        return avatar_id;
-    }
-
-    public String getUsername() {
-        return username;
+        this.username = username;
     }
 
     public Avatar getAvatar() {
@@ -33,11 +26,15 @@ public class LoginResponse implements Response {
     }
 
     public Integer getUserId() {
-        return user_id;
+        return userId;
     }
 
-    public void setUser_id(Integer user_id) {
-        this.user_id = user_id;
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUserId(Integer userId) {
+        this.userId = userId;
     }
 
     public void setMessage(String message) {
