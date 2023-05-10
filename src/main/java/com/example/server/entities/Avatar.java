@@ -43,16 +43,12 @@ public class Avatar {
 
     // Accessory enum
     public enum Accessory {
-        HEART_GLASSES,
-        SANTA_HAT,
-        NORMAL_GLASSES,
-        COOK_HAT,
-        EMPTY
+        HEART_GLASSES, SANTA_HAT, NORMAL_GLASSES, COOK_HAT, EMPTY
     }
 
     // Color enum
     public enum Color {
-        PINK, BLUE, GREEN, YELLOW, RED
+        PINK, BLUE, GREEN, YELLOW
     }
 
 }
