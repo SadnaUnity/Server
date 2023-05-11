@@ -458,7 +458,6 @@ GET /getPositions?userId={userId}
         "avatarId": 1
       },
       "position": {
-        "id": 1,
         "x": 2.0,
         "y": 3.0
       }
@@ -470,7 +469,6 @@ GET /getPositions?userId={userId}
         "avatarId": 3
       },
       "position": {
-        "id": 3,
         "x": 2.0,
         "y": 3.0
       }
