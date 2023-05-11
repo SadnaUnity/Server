@@ -6,13 +6,19 @@ public class Poster {
     private Integer roomId;
     private Integer userId;
     private Integer posterId;
+    private Position position;
 
-    public Poster(String posterName, String fileUrl, Integer roomId, Integer userId, Integer posterId) {
+    public Poster(String posterName, String fileUrl, Integer roomId, Integer userId, Integer posterId, Position position) {
         this.posterName = posterName;
         this.fileUrl = fileUrl;
         this.roomId = roomId;
         this.userId = userId;
         this.posterId = posterId;
+        this.position=position;
+    }
+
+    public Position getPosition() {
+        return position;
     }
 
     public Integer getPosterId() {

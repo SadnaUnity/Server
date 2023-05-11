@@ -71,8 +71,9 @@ public class ChatWebSocketHandler implements WebSocketHandler {
 
     private void broadcastMessage(WebSocketSession session, String messageContent) throws IOException {
         List<WebSocketSession> sessionList = getSessionList(session);
+        Integer userId = usersSessions.get(session);
         for (WebSocketSession webSocketSession : sessionList) {
-            webSocketSession.sendMessage(new TextMessage(messageContent));
+            webSocketSession.sendMessage(new TextMessage("user " + userId + ": " + messageContent));
         }
     }
     private List<WebSocketSession> getSessionList(WebSocketSession session) {

@@ -1,6 +1,7 @@
 package com.example.server.controllers;
 import com.example.server.Database;
 import com.example.server.ServerConstants;
+import com.example.server.entities.Position;
 import com.example.server.entities.Poster;
 import com.example.server.response.PosterResponse;
 import com.example.server.response.Response;
@@ -37,7 +38,7 @@ public class PosterController {
     }
 
     @PostMapping("/poster")
-    public ResponseEntity<Response> createPoster(@RequestParam String posterName, @RequestParam Integer roomId, @RequestParam Integer userId, @RequestPart MultipartFile file) {
+    public ResponseEntity<Response> createPoster(@RequestParam String posterName, @RequestParam float xPos,@RequestParam float yPos,@RequestParam Integer roomId, @RequestParam Integer userId, @RequestPart MultipartFile file) {
         if (file.isEmpty()) {
             return badRequestResponse(ServerConstants.IMAGE_EMPTY);
         }
@@ -60,7 +61,7 @@ public class PosterController {
             byte[] fileData = file.getBytes();
             Blob blob = gcpStorage.create(blobInfo, fileData);
             String fileUrl = blob.getMediaLink();
-            Poster poster = addNewPosterToDB(posterName, userId, roomId, fileUrl);
+            Poster poster = addNewPosterToDB(posterName, userId, roomId, fileUrl,xPos,yPos);
             return ResponseEntity.status(HttpStatus.OK).body(new PosterResponse(String.format(ServerConstants.POSTER_CREATED_SUCCESSFULLY, posterName), poster.getPosterId(), poster));
         } catch (Exception err) {
             return serverErrorResponse(ServerConstants.FILE_UPLOAD_FAILED, userId, null);
@@ -100,23 +101,25 @@ public class PosterController {
         }
     }
 
-    private Poster addNewPosterToDB(String posterName, Integer userId, Integer roomId, String url) {
+    private Poster addNewPosterToDB(String posterName, Integer userId, Integer roomId, String url, float xPos, float yPos) {
         Poster poster = null;
         try {
-            String sql = "INSERT INTO posters (user_id, room_id, poster_name, url) VALUES (?, ?, ?, ?)";
+            String sql = "INSERT INTO posters (user_id, room_id, poster_name, url, position_x, position_x) VALUES (?, ?, ?, ?,?,?)";
             PreparedStatement stmt = connectionDB.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
 
             stmt.setInt(1, userId);
             stmt.setInt(2, roomId);
             stmt.setString(3, posterName);
             stmt.setString(4, url);
+            stmt.setFloat(5, xPos);
+            stmt.setFloat(6, yPos);
             int rowsAffected = stmt.executeUpdate();
             if (rowsAffected > 0) {
                 ResultSet rs = stmt.getGeneratedKeys();
                 System.out.println(rs.toString());
                 if (rs.next()) {
                     Integer posterId = rs.getInt(1);
-                    poster = new Poster(posterName, url, roomId, userId, posterId);
+                    poster = new Poster(posterName, url, roomId, userId, posterId,new Position(xPos,yPos));
                 }
             }
             stmt.close();
@@ -136,7 +139,9 @@ public class PosterController {
                 Integer userId = rs.getInt("user_id");
                 String posterName = rs.getString("poster_name");
                 String fileUrl = rs.getString("url");
-                return new Poster(posterName,fileUrl,roomId,userId,posterId);
+                float xPos = rs.getFloat("position_x");
+                float yPos = rs.getFloat("position_y");
+                return new Poster(posterName,fileUrl,roomId,userId,posterId,new Position(xPos,yPos));
             } else {
                 return null;
             }
