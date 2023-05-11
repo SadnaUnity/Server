@@ -123,7 +123,7 @@ public class AvatarController {
             // Prepare the SQL statement with parameters
             accessory = (accessory != null) ? accessory : Avatar.Accessory.EMPTY;
             color = (color != null) ? color : Avatar.Color.PINK;
-            String sql = "INSERT INTO avatars (user_id, accessory, color) VALUES (?, ?, ?, ?)";
+            String sql = "INSERT INTO avatars (avatar_id, accessory, color) VALUES (?, ?, ?)";
             PreparedStatement statement = connectionDB.prepareStatement(sql);
             statement.setInt(1, userId);
             statement.setString(2, String.valueOf(accessory));

@@ -19,14 +19,14 @@ public class MovingController {
     AvatarController avatarController;
     public MovingController(RoomController roomController, AvatarController avatarController) {
         positions = new HashMap<>();
-        positions.put(1,new Position(1,2,3));
-        positions.put(3,new Position(3,2,3));
+        positions.put(1,new Position(2,3));
+        positions.put(3,new Position(2,3));
         this.roomController = roomController;
         this.avatarController = avatarController;
     }
     @PostMapping("/updatePosition")
-    public ResponseEntity<String> updatePosition(@RequestBody Position posData) {
-        positions.put(posData.getId(), posData);
+    public ResponseEntity<String> updatePosition(@RequestBody Position posData, @RequestParam Integer userId) {
+        positions.put(userId, posData);
         return ResponseEntity.status(HttpStatus.OK).body(ServerConstants.POSITION_UPDATED_SUCCESSFULLY);
     }
     @GetMapping("/getPositions")
