@@ -34,7 +34,7 @@ public class LoginController {
         }
     }
     @PostMapping("/register")
-    public ResponseEntity<Response> register(@RequestParam String username, @RequestParam String password) {
+    public ResponseEntity<Response> register(@RequestParam String username, @RequestParam String password, @RequestParam Integer avatarColor, @RequestParam Integer avatarAccessory) {
         if (connectionDBInstance.isValueExist(ServerConstants.USERS_TABLE,"username",username)) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new LoginResponse(String.format(ServerConstants.USER_EXISTS, username),null, null, null));
         } else if (!isValidUserName(username) || !isValidPassword(password)) {
@@ -43,7 +43,7 @@ public class LoginController {
         Avatar avatar = null;
         Integer userId = createNewUserInSystem(username, password);
         if (userId != 0) {
-            avatar = avatarController.addNewAvatarToSystem(userId, null, null);
+            avatar = avatarController.addNewAvatarToSystem(userId, Avatar.Color.values()[avatarColor], Avatar.Accessory.values()[avatarAccessory]);
             roomController.addUserToRoom(userId,ServerConstants.DEFAULT_ROOM);
         }
         HttpStatus status = userId != null ? HttpStatus.OK : HttpStatus.INTERNAL_SERVER_ERROR;
