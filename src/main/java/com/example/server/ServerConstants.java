@@ -9,6 +9,7 @@ public class ServerConstants {
     public static final String AVATAR_TABLE = "avatars";
     public static final String POSTERS_TABLE = "posters";
     public static final String ROOM_EXISTS = "Room with name: '%s' is already exist";
+    public static final String USER_ALREADY_ONLINE = "Username: '%s' is already online!";
     public static final String POSTER_EXISTS = "Poster with name: '%s' is already exist";
     public static final String ROOM_ID_NOT_EXISTS = "ERROR! Room Id: '%s' isn't exist";
     public static final String POSTER_ID_NOT_EXISTS = "ERROR! Poster Id: '%s' isn't exist";
@@ -16,7 +17,8 @@ public class ServerConstants {
     public static final String AVATAR_NOT_EXISTS = "ERROR! Avatar for user id: '%s' isn't exist";
     public static final String ROOM_CREATED_SUCCESSFULLY = "Room: '%s' created successfully";
     public static final String USER_CHANGED_ROOM_SUCCESSFULLY = "User Id: '%s' moved into room Id: '%s' successfully";
-    public static final String AVATAR_CREATED_SUCCESSFULLY = "Avatar: '%s' created successfully";
+    public static final String AVATAR_UPDATED_SUCCESSFULLY = "Avatar properties updated successfully";
+    public static final String LOGOUT_MESSAGE = "Bye Bye...";
     public static final String POSITION_UPDATED_SUCCESSFULLY = "Position updated successfully!";
     public static final String USER_CREATED_SUCCESSFULLY = "User: '%s' created successfully";
     public static final String POSTER_CREATED_SUCCESSFULLY = "Poster: '%s' created successfully";

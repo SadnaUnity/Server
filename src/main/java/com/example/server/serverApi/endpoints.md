@@ -360,14 +360,27 @@ POST /getIntoRoom?roomId=1&userId=1
 
 **Example Response(HTTP 200 OK):**
  ```json
-  {
-    "message": "User 456 changed room successfully to Room 123",
+{
+  "message": "Completed successfully",
+  "roomId": 123,
+  "room": {
+    "privacy": true,
+    "managerId": 456,
+    "maxCapacity": 10,
     "roomId": 123,
-    "roomInfo": {
-      "name": "Example Room",
-      "capacity": 10
-    }
+    "roomName": "Example Room",
+    "posters": [
+      {
+        "posterId": 1,
+        "title": "Poster 1"
+      },
+      {
+        "posterId": 2,
+        "title": "Poster 2"
+      }
+    ]
   }
+}
   ```
 
 ---
