@@ -35,10 +35,11 @@ public class PosterController {
     Storage gcpStorage;
     private final ControllerManager controllerManager;
     @Autowired
-    public PosterController(@Lazy ControllerManager controllerManager, @Lazy Connection connectionDB) {
+    public PosterController(@Lazy ControllerManager controllerManager) {
         try {
             this.controllerManager = controllerManager;
-            connectionDB = connectionDB;
+            connectionDBInstance = Database.getInstance();
+            connectionDB = connectionDBInstance.getConnection();
             gcpStorage = StorageOptions.newBuilder().setProjectId(ServerConstants.PROJECT_ID).setCredentials(GoogleCredentials.fromStream(getClass().getResourceAsStream("/credentialsData.json"))).build().getService();
         } catch (IOException e) {
             throw new RuntimeException(e);
