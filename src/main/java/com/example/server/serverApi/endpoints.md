@@ -360,14 +360,28 @@ POST /getIntoRoom?roomId=1&userId=1
 
 **Example Response(HTTP 200 OK):**
  ```json
-  {
-    "message": "User 456 changed room successfully to Room 123",
-    "roomId": 123,
-    "roomInfo": {
-      "name": "Example Room",
-      "capacity": 10
-    }
-  }
+    {
+                "posterName": "firstPoster,firstPoster",
+                "fileUrl": "https://storage.googleapis.com/download/storage/v1/b/posters-sadna/o/9646e461-2447-4022-9614-d5823b1d65b5?generation=1683624436112203&alt=media",
+                "roomId": 1,
+                "userId": 1,
+                "posterId": 6,
+                "position": {
+                    "x": 0.0,
+                    "y": 0.0
+                }
+            },
+            {
+                "posterName": "a,a",
+                "fileUrl": "https://storage.googleapis.com/download/storage/v1/b/posters-sadna/o/05b9e369-3401-4c79-be5c-e16d6d4c211c?generation=1683625290680396&alt=media",
+                "roomId": 1,
+                "userId": 1,
+                "posterId": 7,
+                "position": {
+                    "x": 0.0,
+                    "y": 0.0
+                }
+            }
   ```
 
 ---
