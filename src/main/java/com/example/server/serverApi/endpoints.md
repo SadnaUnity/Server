@@ -69,11 +69,11 @@ The response will include a JSON object with the following keys:
 Content-Type: application/json</code>
 ```json
 {
-"avatar_id": 9,
-"message": "User: 'amira' created successfully",
-"avatar": null,
-"username": "amira",
-"userId": 9
+  "avatar_id": 9,
+  "message": "User: 'amira' created successfully",
+  "avatar": null,
+  "username": "amira",
+  "userId": 9
 }
 ```
 
@@ -360,27 +360,28 @@ POST /getIntoRoom?roomId=1&userId=1
 
 **Example Response(HTTP 200 OK):**
  ```json
-{
-  "message": "Completed successfully",
-  "roomId": 123,
-  "room": {
-    "privacy": true,
-    "managerId": 456,
-    "maxCapacity": 10,
-    "roomId": 123,
-    "roomName": "Example Room",
-    "posters": [
-      {
-        "posterId": 1,
-        "title": "Poster 1"
-      },
-      {
-        "posterId": 2,
-        "title": "Poster 2"
+    {
+        "posterName": "firstPoster,firstPoster",
+        "fileUrl": "https://storage.googleapis.com/download/storage/v1/b/posters-sadna/o/9646e461-2447-4022-9614-d5823b1d65b5?generation=1683624436112203&alt=media",
+        "roomId": 1,
+        "userId": 1,
+        "posterId": 6,
+        "position": {
+            "x": 0.0,
+            "y": 0.0
+        }
+    },
+    {
+        "posterName": "a,a",
+        "fileUrl": "https://storage.googleapis.com/download/storage/v1/b/posters-sadna/o/05b9e369-3401-4c79-be5c-e16d6d4c211c?generation=1683625290680396&alt=media",
+        "roomId": 1,
+        "userId": 1,
+        "posterId": 7,
+        "position": {
+            "x": 0.0,
+            "y": 0.0
+        }
       }
-    ]
-  }
-}
   ```
 
 ---
@@ -471,7 +472,6 @@ GET /getPositions?userId={userId}
         "avatarId": 1
       },
       "position": {
-        "id": 1,
         "x": 2.0,
         "y": 3.0
       }
@@ -483,7 +483,6 @@ GET /getPositions?userId={userId}
         "avatarId": 3
       },
       "position": {
-        "id": 3,
         "x": 2.0,
         "y": 3.0
       }
@@ -523,14 +522,28 @@ GET /room/123
     "roomId": 123,
     "roomName": "Example Room",
     "posters": [
-      {
-        "posterId": 1,
-        "title": "Poster 1"
-      },
-      {
-        "posterId": 2,
-        "title": "Poster 2"
-      }
+       {
+            "posterName": "firstPoster,firstPoster",
+            "fileUrl": "https://storage.googleapis.com/download/storage/v1/b/posters-sadna/o/9646e461-2447-4022-9614-d5823b1d65b5?generation=1683624436112203&alt=media",
+            "roomId": 1,
+            "userId": 1,
+            "posterId": 6,
+            "position": {
+                "x": 0.0,
+                "y": 0.0
+            }
+        },
+        {
+            "posterName": "a,a",
+            "fileUrl": "https://storage.googleapis.com/download/storage/v1/b/posters-sadna/o/05b9e369-3401-4c79-be5c-e16d6d4c211c?generation=1683625290680396&alt=media",
+            "roomId": 1,
+            "userId": 1,
+            "posterId": 7,
+            "position": {
+                "x": 0.0,
+                "y": 0.0
+            }
+        }
     ]
   }
 }
