@@ -4,31 +4,36 @@ import com.example.server.ServerConstants;
 import com.example.server.entities.Avatar;
 import com.example.server.response.LoginResponse;
 import com.example.server.response.Response;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.*;
 
 import java.sql.*;
 
 @RestController
+@Component
 public class LoginController {
     Database connectionDBInstance;
     Connection connectionDB;
-    AvatarController avatarController;
-    RoomController roomController;
-    public LoginController(RoomController roomController) {
+
+    private final ControllerManager controllerManager;
+
+    @Autowired
+    public LoginController(@Lazy ControllerManager controllerManager) {
+        this.controllerManager = controllerManager;
         connectionDBInstance = Database.getInstance();
         connectionDB = connectionDBInstance.getConnection();
-        avatarController = new AvatarController();
-        this.roomController = roomController;
-//        printEverything();
     }
+
     @PostMapping("/login")
     public ResponseEntity<Response> login(@RequestParam String username, @RequestParam String password) {
         Integer userId = connectionDBInstance.checkValidUserDetailsLogin(username.trim(), password.trim());
         if (userId != 0) {
-            roomController.addUserToRoom(userId,ServerConstants.DEFAULT_ROOM);
-            return ResponseEntity.status(HttpStatus.OK).body(new LoginResponse(ServerConstants.LOGIN_SUCCESSFULLY, userId,username,avatarController.getAvatar(userId)));
+            controllerManager.addUserToRoom(userId,ServerConstants.DEFAULT_ROOM);
+            return ResponseEntity.status(HttpStatus.OK).body(new LoginResponse(ServerConstants.LOGIN_SUCCESSFULLY, userId,username,controllerManager.getAvatar(userId)));
         } else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new LoginResponse(ServerConstants.INVALID_USERNAME_OR_PASSWORD, null,null, null));
         }
@@ -43,8 +48,8 @@ public class LoginController {
         Avatar avatar = null;
         Integer userId = createNewUserInSystem(username, password);
         if (userId != 0) {
-            avatar = avatarController.addNewAvatarToSystem(userId, Avatar.Color.values()[avatarColor], Avatar.Accessory.values()[avatarAccessory]);
-            roomController.addUserToRoom(userId,ServerConstants.DEFAULT_ROOM);
+            avatar = controllerManager.addNewAvatarToSystem(userId, Avatar.Color.values()[avatarColor], Avatar.Accessory.values()[avatarAccessory]);
+            controllerManager.addUserToRoom(userId,ServerConstants.DEFAULT_ROOM);
         }
         HttpStatus status = userId != null ? HttpStatus.OK : HttpStatus.INTERNAL_SERVER_ERROR;
         String message = userId != null ? String.format(ServerConstants.USER_CREATED_SUCCESSFULLY, username) : ServerConstants.UNEXPECTED_ERROR;

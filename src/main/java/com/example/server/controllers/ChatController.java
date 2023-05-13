@@ -1,13 +1,14 @@
-package com.example.server.chat;
-
+package com.example.server.controllers;
+import com.example.server.controllers.ControllerManager;
 import com.example.server.controllers.RoomController;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.WebSocketMessage;
 import org.springframework.web.socket.WebSocketSession;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -15,19 +16,20 @@ import java.util.List;
 import java.util.Map;
 
 @Component
-public class ChatWebSocketHandler implements WebSocketHandler {
-    private final RoomController roomController;
+public class ChatController implements WebSocketHandler {
     private Map<WebSocketSession,Integer> usersSessions = new HashMap<>();
     private Map<Integer,List<WebSocketSession> > roomSockets = new HashMap<>();
+    private final ControllerManager controllerManager;
 
-    //TODO get room (incluse position)
-    public ChatWebSocketHandler(RoomController roomController) {
-        this.roomController = roomController;
+
+    @Autowired
+    public ChatController(@Lazy ControllerManager controllerManager) {
+        this.controllerManager = controllerManager;
     }
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
         Integer userId = Integer.valueOf(session.getHandshakeHeaders().get("userID").get(0));
-        Integer roomId = roomController.findRoomIdByUserId(userId);
+        Integer roomId = controllerManager.findRoomIdByUserId(userId);
 
         // Add the session to the corresponding room sockets list
         List<WebSocketSession> roomSocketsList = roomSockets.getOrDefault(roomId, new ArrayList<>());
@@ -37,20 +39,15 @@ public class ChatWebSocketHandler implements WebSocketHandler {
         // Map the session to the user ID
         usersSessions.put(session, userId);
     }
-
-
     @Override
     public void handleMessage(WebSocketSession session, WebSocketMessage<?> message) throws Exception {
         String payload = (String) message.getPayload();
         broadcastMessage(session,payload);
     }
-
-
     @Override
     public void handleTransportError(WebSocketSession session, Throwable exception) throws Exception {
         // Handle transport error
     }
-
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus closeStatus) throws Exception {
         // Remove the session from usersSessions map
@@ -62,13 +59,10 @@ public class ChatWebSocketHandler implements WebSocketHandler {
             roomSocketsList.remove(session);
         }
     }
-
-
     @Override
     public boolean supportsPartialMessages() {
         return false;
     }
-
     private void broadcastMessage(WebSocketSession session, String messageContent) throws IOException {
         List<WebSocketSession> sessionList = getSessionList(session);
         Integer userId = usersSessions.get(session);
@@ -85,8 +79,7 @@ public class ChatWebSocketHandler implements WebSocketHandler {
         }
         return null;
     }
-
-    private void changeUserRoom(int userId, int newRoomId) {
+    public void changeUserRoom(int userId, int newRoomId) {
         // Retrieve the list of WebSocketSession objects associated with the userId
         WebSocketSession userSession = null;
         for (Map.Entry<WebSocketSession, Integer> entry : usersSessions.entrySet()) {
