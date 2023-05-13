@@ -31,7 +31,8 @@ public class PosterController {
         try {
             connectionDBInstance = Database.getInstance();
             connectionDB = connectionDBInstance.getConnection();
-            gcpStorage = StorageOptions.newBuilder().setProjectId(ServerConstants.PROJECT_ID).setCredentials(GoogleCredentials.fromStream(new FileInputStream(ServerConstants.CREDENTIALS_PATH))).build().getService();
+//            gcpStorage = StorageOptions.newBuilder().setProjectId(ServerConstants.PROJECT_ID).setCredentials(GoogleCredentials.fromStream(new FileInputStream(ServerConstants.CREDENTIALS_PATH))).build().getService();
+            gcpStorage = StorageOptions.newBuilder().setProjectId(ServerConstants.PROJECT_ID).setCredentials(GoogleCredentials.fromStream(getClass().getResourceAsStream("/credentialsData.json"))).build().getService();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
