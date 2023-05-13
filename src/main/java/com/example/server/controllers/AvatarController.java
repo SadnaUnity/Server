@@ -3,10 +3,11 @@ import com.example.server.Database;
 import com.example.server.ServerConstants;
 import com.example.server.entities.Avatar;
 import com.example.server.response.AvatarResponse;
-import com.example.server.response.LoginResponse;
-import com.example.server.response.Response;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.*;
 
 import java.sql.*;
@@ -16,37 +17,31 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@Singleton
+@Component
 public class AvatarController {
     Database connectionDBInstance;
     Connection connectionDB;
+    private final ControllerManager controllerManager;
 
-    public AvatarController() {
+    @Autowired
+    public AvatarController(@Lazy ControllerManager controllerManager) {
+        this.controllerManager = controllerManager;
         connectionDBInstance = Database.getInstance();
         connectionDB = connectionDBInstance.getConnection();
-//        printEverything();
     }
 
-//    @PostMapping("/avatar")
-//    public ResponseEntity<Response> createAvatar(@RequestParam Integer userId, @RequestBody Avatar userRequestAvatar) {
-//        if (!connectionDBInstance.isValueExist(ServerConstants.USERS_TABLE,"user_id",userId)) {
-//            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new LoginResponse(String.format(ServerConstants.USER_ID_NOT_EXISTS, userId), userId,userId, null));
-//        }
-//        String avatarName = userRequestAvatar.getName();
-//        Avatar.Accessory accessory = userRequestAvatar.getAccessory();
-//        Avatar.Color color = userRequestAvatar.getColor();
-//        Avatar avatar = addNewAvatarToSystem(userId, avatarName, color, accessory);
-//        HttpStatus status = (avatar != null) ? HttpStatus.OK : HttpStatus.BAD_REQUEST;
-//        String message = (avatar != null) ? ServerConstants.AVATAR_CREATED_SUCCESSFULLY : ServerConstants.FAILED_CREATE_AVATAR;
-//        return ResponseEntity.status(status).body(new AvatarResponse(String.format(message, avatarName), userId, avatar));
+//    @Autowired
+//    public AvatarController(ControllerManager controllerManager) {
+//        this.controllerManager = controllerManager;
+//
 //    }
+
     @PutMapping("/avatar/{avatarId}")
     public ResponseEntity<AvatarResponse> editAvatarProperties(@RequestBody Avatar userRequestAvatar, @PathVariable Integer avatarId) {
         if (!connectionDBInstance.isValueExist(ServerConstants.AVATAR_TABLE, "avatar_id", avatarId)) {
             return ResponseEntity.badRequest().body(new AvatarResponse(String.format(ServerConstants.AVATAR_NOT_EXISTS, avatarId), avatarId, null));
         }
         Map<String, Object> properties = new HashMap<>();
-        //properties.put("avatar_name", userRequestAvatar.getName());
         properties.put("color", userRequestAvatar.getColor());
         properties.put("accessory", userRequestAvatar.getAccessory());
         boolean avatarChanged = updateAvatarsTable(properties);
@@ -88,35 +83,6 @@ public class AvatarController {
             return null;
         }
     }
-    private void printEverything(){
-        try {
-
-            // Create a SELECT statement to retrieve the data from your table
-            String sql = "SELECT * FROM users";
-            Statement stmt = connectionDB.createStatement();
-
-            // Execute the SELECT statement and retrieve the ResultSet
-            ResultSet rs = stmt.executeQuery(sql);
-
-            // Loop through the ResultSet and print each row
-            while (rs.next()) {
-                // Get the values for each column in the current row
-                int id = rs.getInt("user_id");
-                String username = rs.getString("username");
-                int password = rs.getInt("password");
-
-                // Print the values to the console or to a file
-                System.out.println(id + ", " + username + ", " + password);
-            }
-
-            // Close the resources
-            rs.close();
-            stmt.close();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
-    }
     public Avatar addNewAvatarToSystem(Integer userId, Avatar.Color color, Avatar.Accessory accessory) {
         Avatar avatar = null;
         try {
@@ -139,22 +105,6 @@ public class AvatarController {
         }
     }
 
-//    private Avatar updateAvatarsTable(Integer avatarId, String avatarName, Avatar.Color color, Avatar.Accessory accessory){
-//       Avatar avatar = null;
-//        try {
-//            String sql = "UPDATE avatars SET " + columnToUpdate + " = ? WHERE " + conditionColumn + " = ?";
-//            PreparedStatement statement = connectionDB.prepareStatement(sql);
-//            statement.setObject(1, newValue);
-//            statement.setObject(2, conditionValue);
-//            int numRowsAffected = statement.executeUpdate();
-//            System.out.println(numRowsAffected + " row(s) updated in " + tableName);
-//            statement.close();
-//        } catch (SQLException e) {
-//            System.out.println("Error: " + e.getMessage());
-//        } finally {
-//            return avatar;
-//        }
-//    }
     public boolean updateAvatarsTable(Map<String, Object> properties) {
         boolean updatedSuccessfully=false;
         try {
@@ -185,8 +135,4 @@ public class AvatarController {
             return updatedSuccessfully;
         }
     }
-
-
-
-
 }

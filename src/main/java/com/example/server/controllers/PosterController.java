@@ -10,24 +10,34 @@ import com.google.cloud.storage.BlobId;
 import com.google.cloud.storage.BlobInfo;
 import com.google.cloud.storage.Storage;
 import com.google.cloud.storage.StorageOptions;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import com.google.cloud.storage.Blob;
 import java.io.*;
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 import static com.example.server.response.Response.badRequestResponse;
 import static com.example.server.response.Response.serverErrorResponse;
 
 @RestController
+@Component
 public class PosterController {
     Database connectionDBInstance;
     Connection connectionDB;
     Storage gcpStorage;
-    public PosterController() {
+    private final ControllerManager controllerManager;
+    @Autowired
+    public PosterController(@Lazy ControllerManager controllerManager) {
+        this.controllerManager = controllerManager;
+
         try {
             connectionDBInstance = Database.getInstance();
             connectionDB = connectionDBInstance.getConnection();
@@ -39,7 +49,7 @@ public class PosterController {
     }
 
     @PostMapping("/poster")
-    public ResponseEntity<Response> createPoster(@RequestParam String posterName, @RequestParam float xPos,@RequestParam float yPos,@RequestParam Integer roomId, @RequestParam Integer userId, @RequestPart MultipartFile file) {
+    public ResponseEntity<Response> createPoster(@RequestParam String posterName, @RequestParam float xPos, @RequestParam float yPos, @RequestParam Integer roomId, @RequestParam Integer userId, @RequestPart MultipartFile file) {
         if (file.isEmpty()) {
             return badRequestResponse(ServerConstants.IMAGE_EMPTY);
         }
@@ -62,7 +72,7 @@ public class PosterController {
             byte[] fileData = file.getBytes();
             Blob blob = gcpStorage.create(blobInfo, fileData);
             String fileUrl = blob.getMediaLink();
-            Poster poster = addNewPosterToDB(posterName, userId, roomId, fileUrl,xPos,yPos);
+            Poster poster = addNewPosterToDB(posterName, userId, roomId, fileUrl, xPos, yPos);
             return ResponseEntity.status(HttpStatus.OK).body(new PosterResponse(String.format(ServerConstants.POSTER_CREATED_SUCCESSFULLY, posterName), poster.getPosterId(), poster));
         } catch (Exception err) {
             return serverErrorResponse(ServerConstants.FILE_UPLOAD_FAILED, userId, null);
@@ -120,7 +130,7 @@ public class PosterController {
                 System.out.println(rs.toString());
                 if (rs.next()) {
                     Integer posterId = rs.getInt(1);
-                    poster = new Poster(posterName, url, roomId, userId, posterId,new Position(xPos,yPos));
+                    poster = new Poster(posterName, url, roomId, userId, posterId, new Position(xPos, yPos));
                 }
             }
             stmt.close();
@@ -130,7 +140,8 @@ public class PosterController {
             return poster;
         }
     }
-    private Poster getPoster(Integer posterId){
+
+    private Poster getPoster(Integer posterId) {
         try {
             PreparedStatement stmt = connectionDB.prepareStatement("SELECT * FROM posters WHERE poster_id = ?");
             stmt.setInt(1, posterId);
@@ -142,7 +153,7 @@ public class PosterController {
                 String fileUrl = rs.getString("url");
                 float xPos = rs.getFloat("position_x");
                 float yPos = rs.getFloat("position_y");
-                return new Poster(posterName,fileUrl,roomId,userId,posterId,new Position(xPos,yPos));
+                return new Poster(posterName, fileUrl, roomId, userId, posterId, new Position(xPos, yPos));
             } else {
                 return null;
             }
@@ -157,5 +168,31 @@ public class PosterController {
         //createPoster("first poster",1,1,multipartFile);
     }
 
+    public List<Poster> getAllPostersInRoom(Integer roomId) {
+        List<Poster> posters = new ArrayList<>();
+
+        try {
+            PreparedStatement stmt = connectionDB.prepareStatement("SELECT * FROM posters WHERE room_id = ?");
+            stmt.setInt(1, roomId);
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                Integer posterId = rs.getInt("poster_id");
+                Integer userId = rs.getInt("user_id");
+                String posterName = rs.getString("poster_name");
+                String fileUrl = rs.getString("url");
+                float xPos = rs.getFloat("position_x");
+                float yPos = rs.getFloat("position_y");
+
+                Poster poster = new Poster(posterName, fileUrl, roomId, userId, posterId, new Position(xPos, yPos));
+                posters.add(poster);
+            }
+        } catch (SQLException e) {
+            // Handle the exception
+        } finally {
+            return posters;
+        }
+
+    }
 
 }

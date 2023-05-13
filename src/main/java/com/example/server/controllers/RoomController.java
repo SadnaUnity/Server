@@ -2,10 +2,14 @@ package com.example.server.controllers;
 
 import com.example.server.Database;
 import com.example.server.ServerConstants;
+import com.example.server.entities.Poster;
 import com.example.server.entities.Room;
 import com.example.server.response.Response;
 import com.example.server.response.RoomResponse;
 import com.example.server.response.AllRoomsResponse;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,13 +19,17 @@ import java.sql.*;
 import java.util.*;
 
 @RestController
-@Singleton
+@Component
 public class RoomController {
     Database connectionDBInstance;
     Connection connectionDB;
     Map<Integer, Set<Integer>> roomParticipants; // ROOM ID 1 is default room
 
-    public RoomController() {
+    private final ControllerManager controllerManager;
+
+    @Autowired
+    public RoomController(@Lazy ControllerManager controllerManager) {
+        this.controllerManager = controllerManager;
         connectionDBInstance = Database.getInstance();
         connectionDB = connectionDBInstance.getConnection();
         roomParticipants = new HashMap<>();
@@ -66,6 +74,7 @@ public class RoomController {
         try {
             removeUserFromRoom(userId, ServerConstants.DEFAULT_ROOM);
             addUserToRoom(userId, roomId);
+//            chatController.changeUserRoom(userId,roomId);
             return ResponseEntity.status(HttpStatus.OK).body(new RoomResponse(String.format(ServerConstants.USER_CHANGED_ROOM_SUCCESSFULLY, userId, roomId), roomId, getRoom(roomId)));
         } catch (Exception err) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new RoomResponse(ServerConstants.UNEXPECTED_ERROR, 1, getRoom(ServerConstants.DEFAULT_ROOM)));
@@ -135,19 +144,24 @@ public class RoomController {
         }
     }
     public Room getRoom(Integer roomId) {
+        Boolean privacy;
+        Integer maxCapacity;
+        Integer managerId;
+        String roomName;
         try {
             PreparedStatement stmt = connectionDB.prepareStatement("SELECT * FROM rooms WHERE room_id = ?");
             stmt.setInt(1, roomId);
             ResultSet rs = stmt.executeQuery();
             if (rs.next()) {
-                Boolean privacy = rs.getBoolean("privacy");
-                Integer maxCapacity = (rs.getInt("max_capacity"));
-                Integer managerId = rs.getInt("manager_id");
-                String roomName = rs.getString("room_name");
-                return new Room(privacy, managerId, maxCapacity, roomId, roomName);
+                privacy = rs.getBoolean("privacy");
+                maxCapacity = (rs.getInt("max_capacity"));
+                managerId = rs.getInt("manager_id");
+                roomName = rs.getString("room_name");
             } else {
                 return null;
             }
+            List<Poster> allPostersInRoom = controllerManager.getAllPostersInRoom(roomId);
+            return new Room(privacy, managerId, maxCapacity, roomId, roomName, allPostersInRoom);
         } catch (SQLException e) {
             return null;
         }
@@ -169,7 +183,7 @@ public class RoomController {
             ResultSet rs = stmt.getGeneratedKeys();
             if (rs.next()) {
                 roomId = rs.getInt(1);
-                room = new Room(privacy, managerId, maxCapacity, roomId, roomName);
+                room = new Room(privacy, managerId, maxCapacity, roomId, roomName,null);
             }
             stmt.close();
         } catch (SQLException e) {
@@ -221,5 +235,4 @@ public class RoomController {
     public Set<Integer> getAllUsersInRoom(Integer roomId) {
         return roomParticipants.get(roomId);
     }
-//    get all avatars in room
 }

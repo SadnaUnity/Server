@@ -6,24 +6,29 @@ import com.example.server.entities.AvatarPosition;
 import com.example.server.entities.Position;
 import com.example.server.response.PositionsResponse;
 import com.example.server.response.Response;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
 
 @RestController
+@Component
 public class MovingController {
     Map<Integer, Position> positions;
-    RoomController roomController;
-    AvatarController avatarController;
-    public MovingController(RoomController roomController, AvatarController avatarController) {
+    private final ControllerManager controllerManager;
+
+    @Autowired
+    public MovingController(@Lazy ControllerManager controllerManager) {
+        this.controllerManager = controllerManager;
         positions = new HashMap<>();
         positions.put(1,new Position(2,3));
         positions.put(3,new Position(2,3));
-        this.roomController = roomController;
-        this.avatarController = avatarController;
     }
+
     @PostMapping("/updatePosition")
     public ResponseEntity<String> updatePosition(@RequestBody Position posData, @RequestParam Integer userId) {
         positions.put(userId, posData);
@@ -33,10 +38,10 @@ public class MovingController {
     public ResponseEntity<Response> getPositions(@RequestParam Integer userId) {
         List<AvatarPosition> avatarPositionList = new ArrayList<>();
         try {
-            Integer roomId = roomController.findRoomIdByUserId(userId);
-            Set<Integer> allAvatarsInRoom = roomController.getAllUsersInRoom(roomId);
+            Integer roomId = controllerManager.findRoomIdByUserId(userId);
+            Set<Integer> allAvatarsInRoom = controllerManager.getAllUsersInRoom(roomId);
             for (Integer avatarId : allAvatarsInRoom) {
-                Avatar avatar = avatarController.getAvatar(avatarId);
+                Avatar avatar = controllerManager.getAvatar(avatarId);
                 Position position = getAvatarPosition(avatarId);
                 if (avatar != null && position != null) {
                     avatarPositionList.add(new AvatarPosition(avatar, position));
