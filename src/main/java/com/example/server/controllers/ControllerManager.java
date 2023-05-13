@@ -49,4 +49,7 @@ public class ControllerManager {
     public List<Poster> getAllPostersInRoom(Integer roomId) {
         return posterController.getAllPostersInRoom(roomId);
     }
+    public void changeUserRoom(Integer userId, Integer roomId) {
+        chatController.changeUserRoom(userId,roomId);
+    }
 }
