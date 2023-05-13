@@ -480,3 +480,47 @@ GET /getPositions?userId={userId}
   ```
 
 ---
+
+## `Get A Room`
+This endpoint retrieves information about a specific room based on its ID.
+
+**URL:** `/room/{roomId}`
+
+**Method:** `GET`
+
+**Request Parameters:**
+
+| Field       | Type | Required | Description                             |
+| ----------- |------| -------- |-----------------------------------------|
+| roomId     | int  | Yes      | The ID of the room to retrieve|
+
+**Example Request:**
+
+GET /room/123
+
+**Example Response(HTTP 200 OK):**
+ ```json
+{
+  "message": "Completed successfully",
+  "roomId": 123,
+  "room": {
+    "privacy": true,
+    "managerId": 456,
+    "maxCapacity": 10,
+    "roomId": 123,
+    "roomName": "Example Room",
+    "posters": [
+      {
+        "posterId": 1,
+        "title": "Poster 1"
+      },
+      {
+        "posterId": 2,
+        "title": "Poster 2"
+      }
+    ]
+  }
+}
+
+  ```
+
