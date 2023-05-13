@@ -74,7 +74,7 @@ public class RoomController {
         try {
             removeUserFromRoom(userId, ServerConstants.DEFAULT_ROOM);
             addUserToRoom(userId, roomId);
-//            chatController.changeUserRoom(userId,roomId);
+            controllerManager.changeUserRoom(userId,roomId);
             return ResponseEntity.status(HttpStatus.OK).body(new RoomResponse(String.format(ServerConstants.USER_CHANGED_ROOM_SUCCESSFULLY, userId, roomId), roomId, getRoom(roomId)));
         } catch (Exception err) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new RoomResponse(ServerConstants.UNEXPECTED_ERROR, 1, getRoom(ServerConstants.DEFAULT_ROOM)));
