@@ -27,15 +27,22 @@ public class LoginController {
         connectionDBInstance = Database.getInstance();
         connectionDB = connectionDBInstance.getConnection();
     }
-
+    @PostMapping("/logout")
+    public ResponseEntity<Response> logout(@RequestParam Integer userId) {
+        controllerManager.logout(userId);
+        return ResponseEntity.status(HttpStatus.OK).body(new LoginResponse(ServerConstants.LOGOUT_MESSAGE, userId, null, null));
+    }
     @PostMapping("/login")
     public ResponseEntity<Response> login(@RequestParam String username, @RequestParam String password) {
         Integer userId = connectionDBInstance.checkValidUserDetailsLogin(username.trim(), password.trim());
         if (userId != 0) {
-            controllerManager.addUserToRoom(userId,ServerConstants.DEFAULT_ROOM);
-            return ResponseEntity.status(HttpStatus.OK).body(new LoginResponse(ServerConstants.LOGIN_SUCCESSFULLY, userId,username,controllerManager.getAvatar(userId)));
+            if (controllerManager.isUserOnline(userId)) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new LoginResponse(String.format(ServerConstants.USER_ALREADY_ONLINE, username), userId, username, null));
+            }
+            controllerManager.addUserToRoom(userId, ServerConstants.DEFAULT_ROOM);
+            return ResponseEntity.status(HttpStatus.OK).body(new LoginResponse(ServerConstants.LOGIN_SUCCESSFULLY, userId, username, controllerManager.getAvatar(userId)));
         } else {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new LoginResponse(ServerConstants.INVALID_USERNAME_OR_PASSWORD, null,null, null));
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new LoginResponse(ServerConstants.INVALID_USERNAME_OR_PASSWORD, null, null, null));
         }
     }
     @PostMapping("/register")

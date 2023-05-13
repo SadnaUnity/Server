@@ -1,10 +1,12 @@
 package com.example.server.controllers;
 
+import com.example.server.Database;
 import com.example.server.entities.Avatar;
 import com.example.server.entities.Poster;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.sql.Connection;
 import java.util.List;
 import java.util.Set;
 
@@ -16,6 +18,7 @@ public class ControllerManager {
     private PosterController posterController;
     private RoomController roomController;
     private ChatController chatController;
+//    Connection connectionDB;
 
     @Autowired
     public ControllerManager(AvatarController avatarController, LoginController loginController, MovingController movingController, PosterController posterController, RoomController roomController, ChatController chatController) {
@@ -25,31 +28,38 @@ public class ControllerManager {
         this.posterController = posterController;
         this.roomController = roomController;
         this.chatController = chatController;
+//        this.connectionDB = database.getConnection();
     }
     public Avatar addNewAvatarToSystem(Integer userId, Avatar.Color value, Avatar.Accessory value1) {
         return avatarController.addNewAvatarToSystem(userId, value, value1);
     }
-
     public void addUserToRoom(Integer userId, int defaultRoom) {
-        roomController.addUserToRoom(userId, defaultRoom);
+        roomController.insertUserIdIntoRoom(userId, defaultRoom);
     }
-
     public Avatar getAvatar(Integer userId) {
         return avatarController.getAvatar(userId);
     }
-
     public Integer findRoomIdByUserId(Integer userId) {
         return roomController.findRoomIdByUserId(userId);
     }
-
     public Set<Integer> getAllUsersInRoom(Integer roomId) {
         return roomController.getAllUsersInRoom(roomId);
     }
-
     public List<Poster> getAllPostersInRoom(Integer roomId) {
         return posterController.getAllPostersInRoom(roomId);
     }
-    public void changeUserRoom(Integer userId, Integer roomId) {
-        chatController.changeUserRoom(userId,roomId);
+    public void removeUserFromChatRoom(Integer userId) {
+        chatController.removeUserFromChatRoom(userId);
     }
+    public void addUserIntoChatRoom(Integer userId, Integer roomId) {
+        chatController.addUserIntoChatRoom(userId,roomId);
+    }
+    public void logout(Integer userId){
+        roomController.removeUserFromRoom(userId);
+        chatController.removeUserFromChatRoom(userId);
+    }
+    public boolean isUserOnline(Integer userId) {
+        return roomController.isUserOnline(userId);
+    }
+
 }

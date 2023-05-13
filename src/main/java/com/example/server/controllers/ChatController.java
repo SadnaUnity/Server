@@ -1,6 +1,4 @@
 package com.example.server.controllers;
-import com.example.server.controllers.ControllerManager;
-import com.example.server.controllers.RoomController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
@@ -66,8 +64,9 @@ public class ChatController implements WebSocketHandler {
     private void broadcastMessage(WebSocketSession session, String messageContent) throws IOException {
         List<WebSocketSession> sessionList = getSessionList(session);
         Integer userId = usersSessions.get(session);
+        String textMessage = "user " + userId + ": " + messageContent;
         for (WebSocketSession webSocketSession : sessionList) {
-            webSocketSession.sendMessage(new TextMessage("user " + userId + ": " + messageContent));
+            webSocketSession.sendMessage(new TextMessage(textMessage));
         }
     }
     private List<WebSocketSession> getSessionList(WebSocketSession session) {
@@ -79,16 +78,8 @@ public class ChatController implements WebSocketHandler {
         }
         return null;
     }
-    public void changeUserRoom(int userId, int newRoomId) {
-        // Retrieve the list of WebSocketSession objects associated with the userId
-        WebSocketSession userSession = null;
-        for (Map.Entry<WebSocketSession, Integer> entry : usersSessions.entrySet()) {
-            if (entry.getValue() == userId) {
-                userSession = entry.getKey();
-                break;
-            }
-        }
-
+    public void removeUserFromChatRoom(int userId){
+        WebSocketSession userSession = getSessionByUserId(userId);
         //remove user session from old room
         for (Map.Entry<Integer, List<WebSocketSession>> entry : roomSockets.entrySet()) {
             List<WebSocketSession> roomSocketsList = entry.getValue();
@@ -97,15 +88,26 @@ public class ChatController implements WebSocketHandler {
                 break;
             }
         }
-
-        // Update the roomSockets map with the new userId
-        List<WebSocketSession> roomSocketsList = roomSockets.get(newRoomId);
-        if (roomSocketsList != null) {
-            roomSocketsList.add(userSession);
-        } else {
-            roomSocketsList = new ArrayList<>();
-            roomSocketsList.add(userSession);
-            roomSockets.put(newRoomId, roomSocketsList);
+    }
+    private WebSocketSession getSessionByUserId(Integer userId) {
+        for (Map.Entry<WebSocketSession, Integer> entry : usersSessions.entrySet()) {
+            if (entry.getValue() == userId) {
+                return entry.getKey();
+            }
+        }
+        return null;
+    }
+    public void addUserIntoChatRoom(int userId, int newRoomId) {
+        WebSocketSession userSession = getSessionByUserId(userId);
+        if (userSession != null) { // Update the roomSockets map with the new userId
+            List<WebSocketSession> roomSocketsList = roomSockets.get(newRoomId);
+            if (roomSocketsList != null) {
+                roomSocketsList.add(userSession);
+            } else {
+                roomSocketsList = new ArrayList<>();
+                roomSocketsList.add(userSession);
+                roomSockets.put(newRoomId, roomSocketsList);
+            }
         }
     }
 

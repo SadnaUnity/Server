@@ -35,13 +35,10 @@ public class PosterController {
     Storage gcpStorage;
     private final ControllerManager controllerManager;
     @Autowired
-    public PosterController(@Lazy ControllerManager controllerManager) {
-        this.controllerManager = controllerManager;
-
+    public PosterController(@Lazy ControllerManager controllerManager, @Lazy Connection connectionDB) {
         try {
-            connectionDBInstance = Database.getInstance();
-            connectionDB = connectionDBInstance.getConnection();
-//            gcpStorage = StorageOptions.newBuilder().setProjectId(ServerConstants.PROJECT_ID).setCredentials(GoogleCredentials.fromStream(new FileInputStream(ServerConstants.CREDENTIALS_PATH))).build().getService();
+            this.controllerManager = controllerManager;
+            connectionDB = connectionDB;
             gcpStorage = StorageOptions.newBuilder().setProjectId(ServerConstants.PROJECT_ID).setCredentials(GoogleCredentials.fromStream(getClass().getResourceAsStream("/credentialsData.json"))).build().getService();
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -160,12 +157,6 @@ public class PosterController {
         } catch (SQLException e) {
             return null;
         }
-    }
-
-    private void newPosterTest() throws IOException {
-        File file = new File("/Users/I567591/Downloads/9AD1CC86-C9EF-48C6-8083-E066B42BEAAD.jpg");
-        MultipartFile multipartFile = new MockMultipartFile("file", "9AD1CC86-C9EF-48C6-8083-E066B42BEAAD.jpg", "image/jpg", new FileInputStream(file));
-        //createPoster("first poster",1,1,multipartFile);
     }
 
     public List<Poster> getAllPostersInRoom(Integer roomId) {

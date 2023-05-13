@@ -24,17 +24,11 @@ public class AvatarController {
     private final ControllerManager controllerManager;
 
     @Autowired
-    public AvatarController(@Lazy ControllerManager controllerManager) {
+    public AvatarController(@Lazy ControllerManager controllerManager, @Lazy Connection connectionDB) {
         this.controllerManager = controllerManager;
-        connectionDBInstance = Database.getInstance();
-        connectionDB = connectionDBInstance.getConnection();
+//        connectionDBInstance = Database.getInstance();
+        connectionDB = connectionDB;
     }
-
-//    @Autowired
-//    public AvatarController(ControllerManager controllerManager) {
-//        this.controllerManager = controllerManager;
-//
-//    }
 
     @PutMapping("/avatar/{avatarId}")
     public ResponseEntity<AvatarResponse> editAvatarProperties(@RequestBody Avatar userRequestAvatar, @PathVariable Integer avatarId) {
@@ -47,7 +41,7 @@ public class AvatarController {
         boolean avatarChanged = updateAvatarsTable(properties);
         if (avatarChanged) {
             userRequestAvatar.setAvatarId(avatarId);
-            return ResponseEntity.ok().body(new AvatarResponse("Avatar properties updated successfully", avatarId, userRequestAvatar));
+            return ResponseEntity.ok().body(new AvatarResponse(String.format(ServerConstants.AVATAR_UPDATED_SUCCESSFULLY), avatarId, userRequestAvatar));
         } else {
             return ResponseEntity.badRequest().body(new AvatarResponse("Failed to update avatar properties", avatarId, null));
         }
