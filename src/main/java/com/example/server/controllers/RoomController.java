@@ -32,21 +32,20 @@ public class RoomController {
         connectionDBInstance = Database.getInstance();
         connectionDB = connectionDBInstance.getConnection();
         roomParticipants = new HashMap<>();
-        Set<Integer> users = new HashSet<>();
-        Set<Integer> users2 = new HashSet<>();
-        Set<Integer> users3 = new HashSet<>();
-        users.add(1);
-        users.add(2);
-        users.add(3);
-        users2.add(4);
-        users2.add(5);
-        users2.add(6);
-        users3.add(7);
-        users3.add(8);
-        users3.add(9);
-        roomParticipants.put(ServerConstants.DEFAULT_ROOM, users);
-        roomParticipants.put(2, users2);
-        roomParticipants.put(3, users3);
+        roomParticipants.put(ServerConstants.DEFAULT_ROOM, new HashSet<>());
+//        Set<Integer> users2 = new HashSet<>();
+//        Set<Integer> users3 = new HashSet<>();
+//        users.add(1);
+//        users.add(2);
+//        users.add(3);
+//        users2.add(4);
+//        users2.add(5);
+//        users2.add(6);
+//        users3.add(7);
+//        users3.add(8);
+//        users3.add(9);
+//        roomParticipants.put(2, users2);
+//        roomParticipants.put(3, users3);
     }
     @PostMapping("/room")
     public ResponseEntity<Response> createRoom(@RequestParam String roomName, @RequestBody Room userRequestRoom) {
@@ -61,6 +60,7 @@ public class RoomController {
         }
         Room room = addNewRoomToDB(roomName, managerId, privacy, maxCapacity);
         if (room != null) {
+            roomParticipants.put(room.getRoomId(),new HashSet<>());
             return ResponseEntity.status(HttpStatus.OK).body(new RoomResponse(String.format(ServerConstants.ROOM_CREATED_SUCCESSFULLY, roomName), room.getRoomId(), room));
         } else {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new RoomResponse(ServerConstants.UNEXPECTED_ERROR, null, room));
@@ -222,8 +222,8 @@ public class RoomController {
         return roomParticipants.get(roomId);
     }
     public boolean isUserOnline(Integer userId) {
-        for (Set<Integer> participants : roomParticipants.values()) {
-            if (participants.contains(userId)) {
+        for (Set<Integer> room : roomParticipants.values()) {
+            if (room != null && room.contains(userId)) {
                 return true; // User is online in at least one room
             }
         }
