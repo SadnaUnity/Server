@@ -24,10 +24,10 @@ public class AvatarController {
     private final ControllerManager controllerManager;
 
     @Autowired
-    public AvatarController(@Lazy ControllerManager controllerManager, @Lazy Connection connectionDB) {
+    public AvatarController(@Lazy ControllerManager controllerManager) {
         this.controllerManager = controllerManager;
-//        connectionDBInstance = Database.getInstance();
-        connectionDB = connectionDB;
+        connectionDBInstance = Database.getInstance();
+        connectionDB = connectionDBInstance.getConnection();
     }
 
     @PutMapping("/avatar/{avatarId}")
