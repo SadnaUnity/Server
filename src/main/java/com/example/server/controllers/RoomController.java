@@ -33,19 +33,7 @@ public class RoomController {
         connectionDB = connectionDBInstance.getConnection();
         roomParticipants = new HashMap<>();
         roomParticipants.put(ServerConstants.DEFAULT_ROOM, new HashSet<>());
-//        Set<Integer> users2 = new HashSet<>();
-//        Set<Integer> users3 = new HashSet<>();
-//        users.add(1);
-//        users.add(2);
-//        users.add(3);
-//        users2.add(4);
-//        users2.add(5);
-//        users2.add(6);
-//        users3.add(7);
-//        users3.add(8);
-//        users3.add(9);
-//        roomParticipants.put(2, users2);
-//        roomParticipants.put(3, users3);
+
     }
     @PostMapping("/room")
     public ResponseEntity<Response> createRoom(@RequestParam String roomName, @RequestBody Room userRequestRoom) {
@@ -204,7 +192,14 @@ public class RoomController {
     public void insertUserIdIntoRoom(Integer userId, Integer roomId) {
         try {
             Set<Integer> room = roomParticipants.get(roomId);
+            if (room == null)
+            {
+                room = new HashSet<Integer>();
+                roomParticipants.put(roomId, room);
+            }
+
             room.add(userId);
+
         } catch (Exception err) {
             throw err;
         }

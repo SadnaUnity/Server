@@ -25,8 +25,6 @@ public class MovingController {
     public MovingController(@Lazy ControllerManager controllerManager) {
         this.controllerManager = controllerManager;
         positions = new HashMap<>();
-        positions.put(1,new Position(2,3));
-        positions.put(3,new Position(2,3));
     }
 
     @PostMapping("/updatePosition")
