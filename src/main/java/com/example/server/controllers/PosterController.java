@@ -113,7 +113,7 @@ public class PosterController {
     private Poster addNewPosterToDB(String posterName, Integer userId, Integer roomId, String url, float xPos, float yPos) {
         Poster poster = null;
         try {
-            String sql = "INSERT INTO posters (user_id, room_id, poster_name, url, position_x, position_x) VALUES (?, ?, ?, ?,?,?)";
+            String sql = "INSERT INTO posters (user_id, room_id, poster_name, url, position_x, position_y) VALUES (?, ?, ?, ?,?,?)";
             PreparedStatement stmt = connectionDB.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
 
             stmt.setInt(1, userId);
