@@ -97,13 +97,28 @@ POST /getOutFromRoom?userId=1
 **Example Response(HTTP 200 OK):**
  ```json
   {
-    "message": "User 456 changed room successfully to Room 123",
-    "roomId": 123,
-    "roomInfo": {
-      "name": "Example Room",
-      "capacity": 10
+  "message": "Message data",
+  "roomStatuses": [
+    {
+      "privacy": false,
+      "managerId": 1,
+      "roomId": 2,
+      "roomName": "shaked",
+      "description": null,
+      "roomMemberStatus": "NOT_A_MEMBER",
+      "requestStatus": null
+    },
+    {
+      "privacy": false,
+      "managerId": 1,
+      "roomId": 3,
+      "roomName": "inbal",
+      "description": null,
+      "roomMemberStatus": "NOT_A_MEMBER",
+      "requestStatus": "PENDING"
     }
-  }
+  ]
+}
   ```
 ---
 ## `Get A Room`
