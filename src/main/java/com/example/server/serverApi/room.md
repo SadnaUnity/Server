@@ -164,7 +164,7 @@ GET /room/123
   ```
 ---
 
-## 1. Get Hall
+## Get Hall
 
 - **URL:** `/hall`
 - **Method:** `GET`
@@ -183,16 +183,25 @@ GET /room/123
 
 ```json
 {
+  "message": "Message data",
   "roomStatuses": [
     {
-      "privacy": true,
-      "managerId": 123,
-      "roomId": 456
+      "privacy": false,
+      "managerId": 1,
+      "roomId": 2,
+      "roomName": "shaked",
+      "description": null,
+      "roomMemberStatus": "NOT_A_MEMBER",
+      "requestStatus": null
     },
     {
       "privacy": false,
-      "managerId": 789,
-      "roomId": 12
+      "managerId": 1,
+      "roomId": 3,
+      "roomName": "inbal",
+      "description": null,
+      "roomMemberStatus": "NOT_A_MEMBER",
+      "requestStatus": "PENDING"
     }
   ]
 }
@@ -200,7 +209,7 @@ GET /room/123
   ```
 ---
 
-## 2. Get Join Room Requests
+## Get Join Room Requests
 
 - **URL:** `/getJoinRoomRequests`
 - **Method:** `GET`
@@ -219,16 +228,17 @@ GET /room/123
 
 ```json
 {
+  "message": "Message data",
   "joinRoomRequests": [
     {
-      "userId": 123,
-      "roomId": 456,
-      "requestStatus": "Pending"
+      "userId": 2,
+      "roomId": 3,
+      "requestStatus": "PENDING"
     },
     {
-      "userId": 789,
-      "roomId": 12,
-      "requestStatus": "Accepted"
+      "userId": 1,
+      "roomId": 3,
+      "requestStatus": "PENDING"
     }
   ]
 }
@@ -236,7 +246,7 @@ GET /room/123
   ```
 ---
 
-## 3. Ask Join Room
+## Ask Join Room
 
 - **URL:** `/joinRoom/{roomId}`
 - **Method:** `POST`
@@ -256,10 +266,11 @@ GET /room/123
 
 ```json
 {
-  "joinRoomRequest": {
-    "userId": 123,
-    "roomId": 456,
-    "requestStatus": "Pending"
+  "message": "Your join request has been sent successfully",
+  "joinRoomRequests": {
+    "userId": 1,
+    "roomId": 3,
+    "requestStatus": "PENDING"
   }
 }
 
