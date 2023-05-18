@@ -24,6 +24,7 @@ public class ServerConstants {
     public static final String POSTER_CREATED_SUCCESSFULLY = "Poster: '%s' created successfully";
     public static final String POSTER_DELETED_SUCCESSFULLY = "Poster: '%s' deleted successfully";
     public static final String ROOM_DELETED_SUCCESSFULLY = "Room: '%s' deleted successfully";
+    public static final String JOIN_ROOM_REQ_SENT_SUCCESSFULLY = "Your join request has been sent successfully";
     public static final String LOGIN_SUCCESSFULLY = "Login successfully";
     public static final String IMAGE_EMPTY = "Image file is empty";
     public static final String FAILED_LOAD_FILE_DATA = "Failed to load file data";

@@ -359,29 +359,19 @@ This endpoint is used to move a user into a specific room.
 POST /getIntoRoom?roomId=1&userId=1
 
 **Example Response(HTTP 200 OK):**
+
  ```json
-    {
-        "posterName": "firstPoster,firstPoster",
-        "fileUrl": "https://storage.googleapis.com/download/storage/v1/b/posters-sadna/o/9646e461-2447-4022-9614-d5823b1d65b5?generation=1683624436112203&alt=media",
-        "roomId": 1,
-        "userId": 1,
-        "posterId": 6,
-        "position": {
-            "x": 0.0,
-            "y": 0.0
-        }
-    },
-    {
-        "posterName": "a,a",
-        "fileUrl": "https://storage.googleapis.com/download/storage/v1/b/posters-sadna/o/05b9e369-3401-4c79-be5c-e16d6d4c211c?generation=1683625290680396&alt=media",
-        "roomId": 1,
-        "userId": 1,
-        "posterId": 7,
-        "position": {
-            "x": 0.0,
-            "y": 0.0
-        }
-      }
+{
+  "posterName": "a",
+  "fileUrl": "https://storage.googleapis.com/download/storage/v1/b/posters-sadna/o/05b9e369-3401-4c79-be5c-e16d6d4c211c?generation=1683625290680396&alt=media",
+  "roomId": 1,
+  "userId": 1,
+  "posterId": 7,
+  "position": {
+    "x": 0.0,
+    "y": 0.0
+  }
+}
   ```
 
 ---
@@ -549,4 +539,107 @@ GET /room/123
 }
 
   ```
+---
+
+## 1. Get Hall
+
+- **URL:** `/hall`
+- **Method:** `GET`
+- **Description:** Retrieves the status of all rooms in the hall.
+
+### Parameters
+
+| Name    | Type     | Required | Description                         |
+|---------|----------|----------|-------------------------------------|
+| userId  | Integer  | Yes      | The ID of the user for whom the room status is being fetched. |
+
+### Response
+
+- **Status Code:** `200 OK` on success, `500 Internal Server Error` on failure.
+- **Body:** JSON object with the following properties:
+
+```json
+{
+  "roomStatuses": [
+    {
+      "privacy": true,
+      "managerId": 123,
+      "roomId": 456
+    },
+    {
+      "privacy": false,
+      "managerId": 789,
+      "roomId": 12
+    }
+  ]
+}
+
+  ```
+---
+
+## 2. Get Join Room Requests
+
+- **URL:** `/getJoinRoomRequests`
+- **Method:** `GET`
+- **Description:** Retrieves all join room requests for a specific manager.
+
+### Parameters
+
+| Name       | Type    | Required | Description                                     |
+|------------|---------|----------|-------------------------------------------------|
+| managerId  | Integer | Yes      | The ID of the manager whose requests are fetched.|
+
+### Response
+
+- **Status Code:** `200 OK` on success.
+- **Body:** JSON object with the following properties:
+
+```json
+{
+  "joinRoomRequests": [
+    {
+      "userId": 123,
+      "roomId": 456,
+      "requestStatus": "Pending"
+    },
+    {
+      "userId": 789,
+      "roomId": 12,
+      "requestStatus": "Accepted"
+    }
+  ]
+}
+
+  ```
+---
+
+## 3. Ask Join Room
+
+- **URL:** `/joinRoom/{roomId}`
+- **Method:** `POST`
+- **Description:** Sends a join room request for a specific room.
+
+### Parameters
+
+| Name    | Type    | Required | Description                                     |
+|---------|---------|----------|-------------------------------------------------|
+| roomId  | Integer | Yes      | The ID of the room for which the request is sent.|
+| userId  | Integer | Yes      | The ID of the user sending the join room request.|
+
+### Response
+
+- **Status Code:** `200 OK` on success, `404 Not Found` if room or user does not exist.
+- **Body:** JSON object with the following properties:
+
+```json
+{
+  "joinRoomRequest": {
+    "userId": 123,
+    "roomId": 456,
+    "requestStatus": "Pending"
+  }
+}
+
+  ```
+---
 

@@ -61,5 +61,8 @@ public class ControllerManager {
     public boolean isUserOnline(Integer userId) {
         return roomController.isUserOnline(userId);
     }
+//    public void addNewUserToSystem(Integer userId){
+//        roomController.addNewUserToRequestJoinRoomsSystem(userId);
+//    }
 
 }
