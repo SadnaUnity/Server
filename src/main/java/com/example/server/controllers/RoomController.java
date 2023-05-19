@@ -15,8 +15,6 @@ import org.springframework.web.bind.annotation.*;
 import java.sql.*;
 import java.util.*;
 
-//todo : add endpoiont - request approved by user
-//todo : create room - add picture
 //todo : delete posters - only admin or user that upload the poster
 @RestController
 @Component
@@ -214,13 +212,14 @@ public class RoomController {
                 }
                 userHandledJoinRoomRequests.add(requestToHandle);
                 joinRoomRequestsForManager.remove(optionalMatchingRequest.get());
-
-                List<Integer> roomMembers = allRoomMembers.get(roomId);
-                if (roomMembers == null) {
-                    roomMembers = new ArrayList<>();
-                    allRoomMembers.put(roomId, roomMembers);
+                if(requestToHandle.getRequestStatus()== JoinRoomRequest.RequestStatus.APPROVED){
+                    List<Integer> roomMembers = allRoomMembers.get(roomId);
+                    if (roomMembers == null) {
+                        roomMembers = new ArrayList<>();
+                        allRoomMembers.put(roomId, roomMembers);
+                    }
+                    roomMembers.add(userId);
                 }
-                roomMembers.add(userId);
                 requestHandled = true;
             }
         } catch (Exception err) {
@@ -253,14 +252,21 @@ public class RoomController {
             return roomStatuses;
         }
     }
-    private JoinRoomRequest.RequestStatus getRequestStatus(Integer userId, Integer managerId, Integer roomId){
+    private JoinRoomRequest.RequestStatus getRequestStatus(Integer userId, Integer managerId, Integer roomId) {
         List<JoinRoomRequest> joinRoomRequestList = joinRoomRequestMap.get(managerId);
-        if(joinRoomRequestList==null){
-            joinRoomRequestList = new ArrayList<>();
+        if (joinRoomRequestList != null) {
+            for (JoinRoomRequest request : joinRoomRequestList) {
+                if (request.getRoomId() == roomId && request.getUserId() == userId) {
+                    return request.getRequestStatus();
+                }
+            }
         }
-        for (JoinRoomRequest request : joinRoomRequestList){
-            if (request.getRoomId() == roomId && request.getUserId()==userId){
-                return request.getRequestStatus();
+        joinRoomRequestList = completedRequestsMapByUser.get(userId);
+        if (joinRoomRequestList != null) {
+            for (JoinRoomRequest request : joinRoomRequestList) {
+                if (request.getRoomId() == roomId) {
+                    return request.getRequestStatus();
+                }
             }
         }
         return null;
