@@ -384,17 +384,11 @@ GET /completedRequests?userId=123
  ```
 ---
 
-
-
-
-
-
-
 ## `POST /handlePendingJoinRequests`
 
 Handles pending join room requests.
 
-### Request Parametes
+### Request Parameters
 - `managerId` (required): The ID of the manager responsible for handling the requests.
 
 ### Request Body
@@ -462,3 +456,59 @@ Content-Type: application/json
 
 
 
+
+
+## `POST /approveRequest`
+
+User approve that he saw all completed requests.
+
+### Parameters
+
+- `approvedRequests` (required): A list of `JoinRoomRequest` objects representing the approved requests.
+- `userId` (required): The ID of the user approving the requests.
+
+### Response
+
+### Success Response
+
+- Status Code: `200 OK`
+- Body: An instance of `AllJoinReqResponse` indicating the success of the approval operation.
+
+### Error Responses
+
+- Status Code: `500 Internal Server Error`
+  - Body: An instance of `AllJoinReqResponse` with an appropriate error message if there was an unexpected error during the approval operation.
+
+### Example
+
+### Request
+
+POST /approveRequest?userId=123  
+Content-Type: application/json  
+```json
+
+[
+  {
+    "userId": 6,
+    "roomId": 3,
+    "requestStatus": "DECLINED"
+  }
+]
+ ```
+
+### Response
+```json
+
+{
+  "message": "Request handled",
+  "joinRoomRequests": [
+    {
+      "userId": 6,
+      "roomId": 3,
+      "requestStatus": "DECLINED"
+    }
+  ],
+  "notHandledJoinRoomRequests": []
+}
+ ```
+---
