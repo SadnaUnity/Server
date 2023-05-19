@@ -384,17 +384,11 @@ GET /completedRequests?userId=123
  ```
 ---
 
-
-
-
-
-
-
 ## `POST /handlePendingJoinRequests`
 
 Handles pending join room requests.
 
-### Request Parametes
+### Request Parameters
 - `managerId` (required): The ID of the manager responsible for handling the requests.
 
 ### Request Body
@@ -518,4 +512,3 @@ Content-Type: application/json
 }
  ```
 ---
-
