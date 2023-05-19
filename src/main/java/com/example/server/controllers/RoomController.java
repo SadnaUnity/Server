@@ -15,6 +15,9 @@ import org.springframework.web.bind.annotation.*;
 import java.sql.*;
 import java.util.*;
 
+//todo : add endpoiont - request approved by user
+//todo : create room - add picture
+//todo : delete posters - only admin or user that upload the poster
 @RestController
 @Component
 public class RoomController {
@@ -165,6 +168,31 @@ public class RoomController {
         }
         return ResponseEntity.status(HttpStatus.OK).body(new AllJoinReqResponse(handledSuccessfullyRequests, msg, notHandledRequests));
     }
+    @PostMapping("/approveRequest")
+    public ResponseEntity<Response> approveRequest(@RequestBody List<JoinRoomRequest> approvedRequests, @RequestParam Integer userId) {
+        List<JoinRoomRequest> handledSuccessfullyRequests = new ArrayList<>();
+        List<JoinRoomRequest> notHandledRequests = new ArrayList<>();
+        String msg = "Request handled";
+        List<JoinRoomRequest> userCompletedRequests = completedRequestsMapByUser.get(userId);
+        try {
+            for (JoinRoomRequest requestToApprove : approvedRequests) {
+                Optional<JoinRoomRequest> optionalMatchingRequest = userCompletedRequests.stream()
+                        .filter(request -> request.getUserId().equals(userId) && request.getRoomId().equals(requestToApprove.getRoomId()) && request.getRequestStatus().equals(requestToApprove.getRequestStatus()))
+                        .findFirst();
+                JoinRoomRequest matchingRequest = optionalMatchingRequest.get();
+                if (optionalMatchingRequest.isPresent()) {
+                    userCompletedRequests.remove(matchingRequest);
+                    handledSuccessfullyRequests.add(matchingRequest);
+                } else {
+                    notHandledRequests.add(matchingRequest);
+                }
+            }
+        } catch (Exception err) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new AllJoinReqResponse(handledSuccessfullyRequests, "Internal error. some of the requests failed"));
+        }
+        return ResponseEntity.status(HttpStatus.OK).body(new AllJoinReqResponse(handledSuccessfullyRequests, msg, notHandledRequests));
+    }
+
     private boolean isUserRoomMember(Integer userId, Integer roomId){
         return allRoomMembers.get(roomId).contains(userId);
     }
