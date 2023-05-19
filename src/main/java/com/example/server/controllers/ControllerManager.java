@@ -18,7 +18,6 @@ public class ControllerManager {
     private PosterController posterController;
     private RoomController roomController;
     private ChatController chatController;
-//    Connection connectionDB;
 
     @Autowired
     public ControllerManager(AvatarController avatarController, LoginController loginController, MovingController movingController, PosterController posterController, RoomController roomController, ChatController chatController) {
@@ -61,8 +60,5 @@ public class ControllerManager {
     public boolean isUserOnline(Integer userId) {
         return roomController.isUserOnline(userId);
     }
-//    public void addNewUserToSystem(Integer userId){
-//        roomController.addNewUserToRequestJoinRoomsSystem(userId);
-//    }
 
 }

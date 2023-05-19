@@ -99,34 +99,5 @@ public class LoginController {
             return user_id;
         }
     }
-    private void printEverything(){
-        try {
-
-            // Create a SELECT statement to retrieve the data from your table
-            String sql = "SELECT * FROM users";
-            Statement stmt = connectionDB.createStatement();
-
-            // Execute the SELECT statement and retrieve the ResultSet
-            ResultSet rs = stmt.executeQuery(sql);
-
-            // Loop through the ResultSet and print each row
-            while (rs.next()) {
-                // Get the values for each column in the current row
-                int id = rs.getInt("user_id");
-                String username = rs.getString("username");
-                int password = rs.getInt("password");
-
-                // Print the values to the console or to a file
-                System.out.println(id + ", " + username + ", " + password);
-            }
-
-            // Close the resources
-            rs.close();
-            stmt.close();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
-    }
 
 }
