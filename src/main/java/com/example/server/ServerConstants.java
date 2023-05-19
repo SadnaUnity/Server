@@ -12,6 +12,8 @@ public class ServerConstants {
     public static final String USER_ALREADY_ONLINE = "Username: '%s' is already online!";
     public static final String POSTER_EXISTS = "Poster with name: '%s' is already exist";
     public static final String ROOM_ID_NOT_EXISTS = "ERROR! Room Id: '%s' isn't exist";
+    public static final String USER_NOT_A_ROOM_MEMBER = "User Id: '%s' isn't a room member!";
+    public static final String USER_NOT_A_ROOM_MANAGER = "Manager Id: '%s' isn't the room manager!";
     public static final String POSTER_ID_NOT_EXISTS = "ERROR! Poster Id: '%s' isn't exist";
     public static final String USER_ID_NOT_EXISTS = "ERROR! User Id: '%s' isn't exist";
     public static final String AVATAR_NOT_EXISTS = "ERROR! Avatar for user id: '%s' isn't exist";

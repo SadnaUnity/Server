@@ -29,7 +29,6 @@ public class AvatarController {
         connectionDBInstance = Database.getInstance();
         connectionDB = connectionDBInstance.getConnection();
     }
-
     @PutMapping("/avatar/{avatarId}")
     public ResponseEntity<AvatarResponse> editAvatarProperties(@RequestBody Avatar userRequestAvatar, @PathVariable Integer avatarId) {
         if (!connectionDBInstance.isValueExist(ServerConstants.AVATAR_TABLE, "avatar_id", avatarId)) {
@@ -46,7 +45,6 @@ public class AvatarController {
             return ResponseEntity.badRequest().body(new AvatarResponse("Failed to update avatar properties", avatarId, null));
         }
     }
-
     @GetMapping("avatar/{avatarId}")
     public ResponseEntity<AvatarResponse> returnAvatarData(@PathVariable Integer avatarId) {
         try {
@@ -60,7 +58,6 @@ public class AvatarController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new AvatarResponse(ServerConstants.UNEXPECTED_ERROR, avatarId, null));
         }
     }
-
     public Avatar getAvatar(Integer avatarId){
         try {
             PreparedStatement stmt = connectionDB.prepareStatement("SELECT * FROM avatars WHERE avatar_id = ?");
@@ -98,7 +95,6 @@ public class AvatarController {
             return avatar;
         }
     }
-
     public boolean updateAvatarsTable(Map<String, Object> properties) {
         boolean updatedSuccessfully=false;
         try {

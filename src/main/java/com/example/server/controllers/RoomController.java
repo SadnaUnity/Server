@@ -24,7 +24,7 @@ public class RoomController {
     Map<Integer, Set<Integer>> roomParticipantsLive; // ROOM ID 1 is default room
     Map<Integer, List<Integer>> allRoomMembers;//room = userId
     Map<Integer, List<JoinRoomRequest>> joinRoomRequestMap; //mangerId - request
-    Map<Integer, List<JoinRoomRequest>> handeledJoinRoomRequestMap; //userId - request
+    Map<Integer, List<JoinRoomRequest>> completedRequestsMapByUser; //userId - request
 
     @Autowired
     public RoomController(@Lazy ControllerManager controllerManager) {
@@ -35,7 +35,7 @@ public class RoomController {
         roomParticipantsLive.put(ServerConstants.DEFAULT_ROOM, new HashSet<>());
         allRoomMembers = new HashMap<>();
         joinRoomRequestMap=new HashMap<>();
-
+        completedRequestsMapByUser =new HashMap<>();
     }
     @PostMapping("/room")
     public ResponseEntity<Response> createRoom(@RequestParam String roomName, @RequestBody Room userRequestRoom) {
@@ -60,6 +60,9 @@ public class RoomController {
     @PostMapping("/getIntoRoom")
     public ResponseEntity<Response> getIntoRoom(@RequestParam Integer roomId, @RequestParam Integer userId) {
         try {
+            if(!isUserRoomMember(userId,roomId)){
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new RoomResponse(String.format(ServerConstants.USER_NOT_A_ROOM_MEMBER, userId), null, null));
+            }
             removeUserFromRoom(userId);
             insertUserIdIntoRoom(userId, roomId);
             controllerManager.removeUserFromChatRoom(ServerConstants.DEFAULT_ROOM);
@@ -75,15 +78,18 @@ public class RoomController {
             removeUserFromRoom(userId);
             insertUserIdIntoRoom(userId, ServerConstants.DEFAULT_ROOM);
             controllerManager.removeUserFromChatRoom(userId);
-            return ResponseEntity.status(HttpStatus.OK).body(new RoomResponse(String.format(ServerConstants.USER_CHANGED_ROOM_SUCCESSFULLY, userId, 1), 1, getRoomDetails(ServerConstants.DEFAULT_ROOM)));
+            return ResponseEntity.status(HttpStatus.OK).body(new HallResponse(getHallDetails(userId),"hall data"));
         } catch (Exception err) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new RoomResponse(ServerConstants.UNEXPECTED_ERROR, null, null));
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new HallResponse(getHallDetails(userId), ServerConstants.UNEXPECTED_ERROR));
         }
     }
     @GetMapping("/room/{roomId}")
-    public ResponseEntity<Response> getRoomByRoomId(@PathVariable Integer roomId, @RequestParam Integer userId) {
+    public ResponseEntity<Response> retrieveRoom(@PathVariable Integer roomId, @RequestParam Integer userId) {
         if (!connectionDBInstance.isValueExist(ServerConstants.ROOMS_TABLE, "room_id", roomId)) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new RoomResponse(String.format(ServerConstants.ROOM_ID_NOT_EXISTS, roomId), null, null));
+        }
+        if (!isUserRoomMember(userId, roomId)) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new RoomResponse(String.format(ServerConstants.USER_NOT_A_ROOM_MEMBER, userId), null, null));
         }
         try {
             Room room = getRoomDetails(roomId);
@@ -93,9 +99,12 @@ public class RoomController {
         }
     }
     @PostMapping("/deleteRoom/{roomId}")
-    public ResponseEntity<Response> deleteRoom(@PathVariable("roomId") Integer roomId) { //delete all posters !!!!
+    public ResponseEntity<Response> deleteRoom(@PathVariable("roomId") Integer roomId, @RequestParam Integer managerId) { //delete all posters !!!!
     if (!connectionDBInstance.isValueExist(ServerConstants.ROOMS_TABLE, "room_id", roomId)) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new RoomResponse(String.format(ServerConstants.ROOM_ID_NOT_EXISTS, roomId), null, null));
+    }
+    if(getRoomDetails(roomId).getManagerId() !=managerId){
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new RoomResponse(String.format(ServerConstants.USER_NOT_A_ROOM_MANAGER, managerId), null, null));
     }
     try {
         String sql = "DELETE FROM rooms WHERE room_id = ?";
@@ -112,7 +121,86 @@ public class RoomController {
     }
 }
     @GetMapping("/hall")
-    public ResponseEntity<Response> getHall(@RequestParam Integer userId) {
+    public ResponseEntity<Response> getHallEndpoint(@RequestParam Integer userId) {
+        List<RoomStatus> roomStatuses = getHallDetails(userId);
+        return ResponseEntity.status(HttpStatus.OK).body(new HallResponse(roomStatuses, "Rooms status got successfully"));
+    }
+    @GetMapping("/waitingJoinRoomRequests")
+    public ResponseEntity<Response> waitingJoinRoomRequests(@RequestParam Integer managerId) {
+        List<JoinRoomRequest> joinRoomRequests = joinRoomRequestMap.get(managerId);
+        return ResponseEntity.status(HttpStatus.OK).body(new AllJoinReqResponse(joinRoomRequests, "Message data"));
+    }
+    @GetMapping("/completedRequests")
+    public ResponseEntity<Response> completedRequests(@RequestParam Integer userId) {
+        List<JoinRoomRequest> joinRoomRequests = completedRequestsMapByUser.get(userId);
+        return ResponseEntity.status(HttpStatus.OK).body(new AllJoinReqResponse(joinRoomRequests, "Message data"));
+    }
+    @PostMapping("/joinRoom/{roomId}")
+    public ResponseEntity<Response> askJoinRoom(@PathVariable("roomId") Integer roomId, @RequestParam Integer userId) {
+        if (!connectionDBInstance.isValueExist(ServerConstants.ROOMS_TABLE, "room_id", roomId)) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new RoomResponse(String.format(ServerConstants.ROOM_ID_NOT_EXISTS, roomId), null, null));
+        }
+        if (!connectionDBInstance.isValueExist(ServerConstants.USERS_TABLE, "user_id", userId)) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new RoomResponse(String.format(ServerConstants.USER_ID_NOT_EXISTS, roomId), null, null));
+        }
+        JoinRoomRequest joinRoomRequest = addNewJoinRoomRequest(userId,roomId);
+        return ResponseEntity.status(HttpStatus.OK).body(new JoinRoomResponse(joinRoomRequest,ServerConstants.JOIN_ROOM_REQ_SENT_SUCCESSFULLY));
+    }
+    @PostMapping("/handlePendingJoinRequests")
+    public ResponseEntity<Response> sendJoinRoomRequests(@RequestBody List<JoinRoomRequest> joinRoomRequestsToHandle, @RequestParam Integer managerId) {
+        List<JoinRoomRequest> handledSuccessfullyRequests = new ArrayList<>();
+        List<JoinRoomRequest> notHandledRequests = new ArrayList<>();
+        String msg = "Request handled";
+        try {
+            for (JoinRoomRequest requestToHandle : joinRoomRequestsToHandle) {
+                boolean handleRequest = handleRequest(requestToHandle,managerId);
+                if (handleRequest) {
+                    handledSuccessfullyRequests.add(requestToHandle);
+                } else {
+                    notHandledRequests.add(requestToHandle);
+                }
+            }
+        } catch (Exception err) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new AllJoinReqResponse(handledSuccessfullyRequests, "Internal error. some of the requests failed"));
+        }
+        return ResponseEntity.status(HttpStatus.OK).body(new AllJoinReqResponse(handledSuccessfullyRequests, msg, notHandledRequests));
+    }
+    private boolean isUserRoomMember(Integer userId, Integer roomId){
+        return allRoomMembers.get(roomId).contains(userId);
+    }
+    private boolean handleRequest(JoinRoomRequest requestToHandle, Integer managerId) {
+        boolean requestHandled = false;
+        try {
+            Integer userId = requestToHandle.getUserId();
+            Integer roomId = requestToHandle.getRoomId();
+            List<JoinRoomRequest> joinRoomRequestsForManager = joinRoomRequestMap.get(managerId);
+
+            Optional<JoinRoomRequest> optionalMatchingRequest = joinRoomRequestsForManager.stream()
+                    .filter(request -> request.getUserId().equals(userId) && request.getRoomId().equals(roomId))
+                    .findFirst();
+            if (optionalMatchingRequest.isPresent()) {
+                List<JoinRoomRequest> userHandledJoinRoomRequests = completedRequestsMapByUser.get(userId);
+                if (userHandledJoinRoomRequests == null) {
+                    userHandledJoinRoomRequests = new ArrayList<>();
+                    completedRequestsMapByUser.put(userId, userHandledJoinRoomRequests);
+                }
+                userHandledJoinRoomRequests.add(requestToHandle);
+                joinRoomRequestsForManager.remove(optionalMatchingRequest.get());
+
+                List<Integer> roomMembers = allRoomMembers.get(roomId);
+                if (roomMembers == null) {
+                    roomMembers = new ArrayList<>();
+                    allRoomMembers.put(roomId, roomMembers);
+                }
+                roomMembers.add(userId);
+                requestHandled = true;
+            }
+        } catch (Exception err) {
+        } finally {
+            return requestHandled;
+        }
+    }
+    private List<RoomStatus> getHallDetails(Integer userId){
         List<RoomStatus> roomStatuses = new ArrayList<>();
         try {
             PreparedStatement stmt = connectionDB.prepareStatement("SELECT * FROM rooms");
@@ -132,45 +220,9 @@ public class RoomController {
                 }
                 roomStatuses.add(new RoomStatus(privacy, managerId, roomId, roomName, description, roomMembershipStatus, joinRoomRequestStatus));
             }
-            return ResponseEntity.status(HttpStatus.OK).body(new HallResponse(roomStatuses, "Rooms status got successfully"));
         } catch (SQLException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new HallResponse(roomStatuses, "Rooms status maybe is not complete"));
-        }
-    }
-    @GetMapping("/getJoinRoomRequests")
-    public ResponseEntity<Response> getAllRequests(@RequestParam Integer managerId) {
-        List<JoinRoomRequest> joinRoomRequests = joinRoomRequestMap.get(managerId);
-        return ResponseEntity.status(HttpStatus.OK).body(new AllJoinReqResponse(joinRoomRequests, "Message data"));
-    }
-    @PostMapping("/joinRoom/{roomId}")
-    public ResponseEntity<Response> askJoinRoom(@PathVariable("roomId") Integer roomId, @RequestParam Integer userId) {
-        if (!connectionDBInstance.isValueExist(ServerConstants.ROOMS_TABLE, "room_id", roomId)) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new RoomResponse(String.format(ServerConstants.ROOM_ID_NOT_EXISTS, roomId), null, null));
-        }
-        if (!connectionDBInstance.isValueExist(ServerConstants.USERS_TABLE, "user_id", userId)) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new RoomResponse(String.format(ServerConstants.USER_ID_NOT_EXISTS, roomId), null, null));
-        }
-        JoinRoomRequest joinRoomRequest = addNewJoinRoomRequest(userId,roomId);
-        return ResponseEntity.status(HttpStatus.OK).body(new JoinRoomResponse(joinRoomRequest,ServerConstants.JOIN_ROOM_REQ_SENT_SUCCESSFULLY));
-    }
-    private void handleJoinRoomRequest(Integer userId, Integer roomId){
-        for(List<JoinRoomRequest> joinRoomRequests : joinRoomRequestMap.values()){
-            for(JoinRoomRequest request : joinRoomRequests){
-                if(userId==request.getUserId() && roomId==request.getRoomId()){
-                    switch (request.getRequestStatus()) {
-                        case APPROVED:
-                        case DECLINED:
-                            List<JoinRoomRequest> joinRoomRequestList = handeledJoinRoomRequestMap.get(userId);
-                            if (joinRoomRequestList == null) {
-                                joinRoomRequestList = new ArrayList<>();
-                            }
-                            joinRoomRequestList.add(request);
-                            handeledJoinRoomRequestMap.put(userId, joinRoomRequestList);
-                            joinRoomRequests.remove(request);
-                            break;
-                    }
-                }
-            }
+        } finally {
+            return roomStatuses;
         }
     }
     private JoinRoomRequest.RequestStatus getRequestStatus(Integer userId, Integer managerId, Integer roomId){
@@ -203,29 +255,6 @@ public class RoomController {
         joinRoomRequestsByManager.add(joinRoomRequest);
         return joinRoomRequest;
     }
-//    @GetMapping ("/joinRoomRequests/{userId}")
-//    public ResponseEntity<Response> askJoinRoom(@RequestParam Integer userId) {
-//        if (!connectionDBInstance.isValueExist(ServerConstants.USERS_TABLE, "user_id", userId)) {
-//            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new RoomResponse(String.format(ServerConstants.USER_ID_NOT_EXISTS, roomId), null, null));
-//        }
-//        List<RoomParticipant> roomParticipantList = new ArrayList<>();
-//        for (Map.Entry<Integer, List<RoomParticipant>> entry : statusPeopleInRoom.entrySet()) {
-//            int roomId = entry.getKey();
-//            List<RoomParticipant> participants = entry.getValue();
-//            for (RoomParticipant participant : participants) {
-//                if(participant.getManagerId() == userId){
-//                    roomParticipantList.add(participant);
-//                }
-//                System.out.println("- User ID: " + participant.getUserId() + ", Approved: " + participant.isApproved());
-//            }
-//            System.out.println();
-//        }
-//        List<RoomParticipant> managerRoomRequests = joinRoomRequests.get(userId);
-//        return ResponseEntity.status(HttpStatus.OK).body(new AllJoinReqResponse(managerRoomRequests, "All requests"));
-//    }
-//    public void addNewUserToRequestJoinRoomsSystem(Integer userId){
-//        joinRoomRequests.put(userId,new ArrayList<>());
-//    }
     public Room getRoomDetails(Integer roomId) {
         Boolean privacy;
         Integer managerId;

@@ -45,7 +45,6 @@ public class PosterController {
             throw new RuntimeException(e);
         }
     }
-
     @PostMapping("/poster")
     public ResponseEntity<Response> createPoster(@RequestParam String posterName, @RequestParam float xPos, @RequestParam float yPos, @RequestParam Integer roomId, @RequestParam Integer userId, @RequestPart MultipartFile file) {
         if (file.isEmpty()) {
@@ -76,7 +75,6 @@ public class PosterController {
             return serverErrorResponse(ServerConstants.FILE_UPLOAD_FAILED, userId, null);
         }
     }
-
     @GetMapping("poster/{posterId}")
     public ResponseEntity<PosterResponse> returnPosterData(@PathVariable Integer posterId) {
         if (!connectionDBInstance.isValueExist(ServerConstants.POSTERS_TABLE, "poster_id", posterId)) {
@@ -89,7 +87,6 @@ public class PosterController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new PosterResponse(ServerConstants.UNEXPECTED_ERROR, posterId, null));
         }
     }
-
     @PostMapping("/deletePoster/{posterId}")
     public ResponseEntity<Response> deletePoster(@PathVariable("posterId") Integer posterId) {
         if (!connectionDBInstance.isValueExist(ServerConstants.POSTERS_TABLE, "poster_id", posterId)) {
@@ -109,7 +106,6 @@ public class PosterController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new PosterResponse(String.format(ServerConstants.UNEXPECTED_ERROR, posterId), posterId, null));
         }
     }
-
     private Poster addNewPosterToDB(String posterName, Integer userId, Integer roomId, String url, float xPos, float yPos) {
         Poster poster = null;
         try {
@@ -138,7 +134,6 @@ public class PosterController {
             return poster;
         }
     }
-
     private Poster getPoster(Integer posterId) {
         try {
             PreparedStatement stmt = connectionDB.prepareStatement("SELECT * FROM posters WHERE poster_id = ?");
@@ -159,7 +154,6 @@ public class PosterController {
             return null;
         }
     }
-
     public List<Poster> getAllPostersInRoom(Integer roomId) {
         List<Poster> posters = new ArrayList<>();
 

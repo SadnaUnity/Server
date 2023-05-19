@@ -76,6 +76,7 @@ POST /getIntoRoom?roomId=1&userId=1
   ```
 
 ---
+
 ## `/getOutFromRoom`
 
 This endpoint is used to move a user out of the current room.
@@ -121,6 +122,7 @@ POST /getOutFromRoom?userId=1
 }
   ```
 ---
+
 ## `Get A Room`
 This endpoint retrieves information about a specific room based on its ID.
 
@@ -130,9 +132,11 @@ This endpoint retrieves information about a specific room based on its ID.
 
 **Request Parameters:**
 
-| Field       | Type | Required | Description                             |
-| ----------- |------| -------- |-----------------------------------------|
-| roomId     | int  | Yes      | The ID of the room to retrieve|
+| Field  | Type | Required | Description                                         |
+|--------|------| -------- |-----------------------------------------------------|
+| roomId | int  | Yes      | The ID of the room to retrieve                      |
+| userId | int  | Yes      | The ID of the user that wants to retrieve room data |
+
 
 **Example Request:**
 
@@ -177,6 +181,51 @@ GET /room/123
 }
 
   ```
+---
+
+## `POST /deleteRoom/{roomId}`
+
+Deletes a room.
+
+### Parameters
+
+- `roomId` (required): The ID of the room to be deleted.
+- `managerId` (required): The ID of the manager performing the deletion.
+
+### Response
+
+#### Success Response
+
+- Status Code: `200 OK`
+- Body: An instance of `RoomResponse` indicating the success of the deletion operation.
+
+#### Error Responses
+
+- Status Code: `404 Not Found`
+    - Body: An instance of `RoomResponse` with an appropriate error message if the room ID does not exist or the user is not a manager of the room.
+
+- Status Code: `500 Internal Server Error`
+    - Body: An instance of `RoomResponse` with an appropriate error message if there was an unexpected error during the deletion operation.
+
+### Example
+
+#### Request
+
+POST /deleteRoom/123?managerId=456
+
+
+#### Response
+
+HTTP/1.1 200 OK  
+Content-Type: application/json
+```json
+
+{
+    "message": "Room: '4' deleted successfully",
+    "roomId": 4,
+    "room": null
+}
+ ```
 ---
 
 ## Get Hall
@@ -224,9 +273,9 @@ GET /room/123
   ```
 ---
 
-## Get Join Room Requests
+## Get Waiting Join Room Requests
 
-- **URL:** `/getJoinRoomRequests`
+- **URL:** `/waitingJoinRoomRequests`
 - **Method:** `GET`
 - **Description:** Retrieves all join room requests for a specific manager.
 
@@ -291,4 +340,125 @@ GET /room/123
 
   ```
 ---
+
+## `GET /completedRequests`
+
+Retrieves the completed join room requests for a specific user.
+
+### Parameters
+
+- `userId` (required): The ID of the user for whom to retrieve completed join room requests.
+
+### Response
+
+### Success Response
+
+- Status Code: `200 OK`
+- Body: An instance of `AllJoinReqResponse` containing the completed join room requests and a message.
+
+### Error Response
+
+- Status Code: Relevant error status code (e.g., `400 Bad Request`, `404 Not Found`, etc.)
+- Body: Error response body with detailed information about the error.
+
+### Example
+
+### Request
+
+GET /completedRequests?userId=123
+
+
+### Response
+```json
+
+{
+    "message": "Message data",
+    "joinRoomRequests": [
+        {
+        "userId": 7,
+        "roomId": 3,
+        "requestStatus": "DECLINED"
+      }
+    ]
+}
+ ```
+---
+
+
+
+
+
+
+
+## `POST /handlePendingJoinRequests`
+
+Handles pending join room requests.
+
+### Request Parametes
+- `managerId` (required): The ID of the manager responsible for handling the requests.
+
+### Request Body
+
+- `joinRoomRequestsToHandle` (required): A list of join room requests to handle. Each request should be represented by a `JoinRoomRequest` object.
+
+### Response
+
+### Success Response
+
+- Status Code: `200 OK`
+- Body: An instance of `AllJoinReqResponse` containing the successfully handled join room requests, a message, and a list of requests that could not be handled.
+
+### Error Response
+
+- Status Code: `500 Internal Server Error`
+- Body: An instance of `AllJoinReqResponse` with an appropriate error message if there was an internal server error.
+
+### Example
+
+### Request
+
+POST /handlePendingJoinRequests/managerId=1  
+Request Body:  
+```json
+
+[
+    {
+        "userId": 7,
+        "roomId": 3,
+        "requestStatus": "DECLINED"
+    },
+    {
+        "userId": 8,
+        "roomId": 3,
+        "requestStatus": "APPROVED"
+    }
+]
+ ```
+
+### Response
+HTTP/1.1 200 OK  
+Content-Type: application/json  
+```json
+ {
+  "message": "Request handled",
+  "joinRoomRequests": [
+    {
+      "userId": 7,
+      "roomId": 3,
+      "requestStatus": "DECLINED"
+    }
+  ],
+  "notHandledJoinRoomRequests": [
+    {
+      "userId": 8,
+      "roomId": 3,
+      "requestStatus": "APPROVED"
+    }
+  ]
+}
+ ```
+---
+
+
+
 
