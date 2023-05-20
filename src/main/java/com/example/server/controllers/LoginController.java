@@ -48,9 +48,9 @@ public class LoginController {
     @PostMapping("/register")
     public ResponseEntity<Response> register(@RequestParam String username, @RequestParam String password, @RequestParam Integer avatarColor, @RequestParam Integer avatarAccessory) {
         if (connectionDBInstance.isValueExist(ServerConstants.USERS_TABLE,"username",username)) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new LoginResponse(String.format(ServerConstants.USER_EXISTS, username),null, null, null));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new LoginResponse(String.format(ServerConstants.USER_EXISTS, username),0, null, null));
         } else if (!isValidUserName(username) || !isValidPassword(password)) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new LoginResponse(ServerConstants.INVALID_USERNAME_OR_PASSWORD, null, null,null));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new LoginResponse(ServerConstants.INVALID_USERNAME_OR_PASSWORD, 0, null, null));
         }
         Avatar avatar = null;
         Integer userId = createNewUserInSystem(username, password);
