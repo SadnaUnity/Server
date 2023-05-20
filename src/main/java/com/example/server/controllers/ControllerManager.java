@@ -29,8 +29,8 @@ public class ControllerManager {
         this.chatController = chatController;
 //        this.connectionDB = database.getConnection();
     }
-    public Avatar addNewAvatarToSystem(Integer userId, Avatar.Color value, Avatar.Accessory value1) {
-        return avatarController.addNewAvatarToSystem(userId, value, value1);
+    public Avatar addNewAvatarToSystem(Integer userId, Avatar.Color color, Avatar.Accessory accessory) {
+        return avatarController.addNewAvatarToSystem(userId, color, accessory);
     }
     public void addUserToRoom(Integer userId, int defaultRoom) {
         roomController.insertUserIdIntoRoom(userId, defaultRoom);
@@ -60,5 +60,7 @@ public class ControllerManager {
     public boolean isUserOnline(Integer userId) {
         return roomController.isUserOnline(userId);
     }
-
+    public Integer getRoomManager(Integer roomId) {
+        return roomController.getRoomManager(roomId);
+    }
 }
