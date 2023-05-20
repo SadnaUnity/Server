@@ -42,7 +42,7 @@ public class LoginController {
             controllerManager.addUserToRoom(userId, ServerConstants.DEFAULT_ROOM);
             return ResponseEntity.status(HttpStatus.OK).body(new LoginResponse(ServerConstants.LOGIN_SUCCESSFULLY, userId, username, controllerManager.getAvatar(userId)));
         } else {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new LoginResponse(ServerConstants.INVALID_USERNAME_OR_PASSWORD, null, null, null));
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new LoginResponse(ServerConstants.INVALID_USERNAME_OR_PASSWORD, 0, null, null));
         }
     }
     @PostMapping("/register")
