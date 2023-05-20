@@ -14,7 +14,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -80,7 +79,7 @@ public class PosterController {
         if (!connectionDBInstance.isValueExist(ServerConstants.POSTERS_TABLE, "poster_id", posterId)) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new PosterResponse(String.format(ServerConstants.POSTER_ID_NOT_EXISTS, posterId), null, null));
         }
-        Poster poster = getPoster(posterId);
+        Poster poster = getPosterDetails(posterId);
         if (poster != null) {
             return ResponseEntity.ok().body(new PosterResponse("Valid Poster", posterId, poster));
         } else {
@@ -88,10 +87,16 @@ public class PosterController {
         }
     }
     @PostMapping("/deletePoster/{posterId}")
-    public ResponseEntity<Response> deletePoster(@PathVariable("posterId") Integer posterId) {
+    public ResponseEntity<Response> deletePoster(@PathVariable("posterId") Integer posterId, @RequestParam Integer userId) {
         if (!connectionDBInstance.isValueExist(ServerConstants.POSTERS_TABLE, "poster_id", posterId)) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new PosterResponse(String.format(ServerConstants.POSTER_ID_NOT_EXISTS, posterId), null, null));
         }
+        if (!connectionDBInstance.isValueExist(ServerConstants.USERS_TABLE, "user_id", userId)) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new PosterResponse(String.format(ServerConstants.USER_ID_NOT_EXISTS, userId), null, null));
+        }
+       if (!isAllowedDeletePoster(userId, posterId)) {
+           return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new PosterResponse(String.format(ServerConstants.NO_PERMISSION_DELETE_POSTER, userId), posterId, null));
+       }
         try {
             String sql = "DELETE FROM posters WHERE poster_id = ?";
             PreparedStatement pstmt = connectionDB.prepareStatement(sql);
@@ -134,7 +139,7 @@ public class PosterController {
             return poster;
         }
     }
-    private Poster getPoster(Integer posterId) {
+    private Poster getPosterDetails(Integer posterId) {
         try {
             PreparedStatement stmt = connectionDB.prepareStatement("SELECT * FROM posters WHERE poster_id = ?");
             stmt.setInt(1, posterId);
@@ -179,6 +184,10 @@ public class PosterController {
             return posters;
         }
 
+    }
+    private boolean isAllowedDeletePoster(Integer userId, Integer posterId) {
+        Poster poster = getPosterDetails(posterId);
+        return poster.getUserId() == userId || controllerManager.getRoomManager(poster.getRoomId()) == userId;
     }
 
 }
