@@ -36,8 +36,22 @@ public class RoomController {
         allRoomMembers = new HashMap<>();
         joinRoomRequestMap = new HashMap<>();
         completedRequestsMapByUser = new HashMap<>();
+        justForUs();
     }
 
+    public void justForUs() {
+        try {
+            PreparedStatement stmt = connectionDB.prepareStatement("SELECT * FROM rooms");
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                Integer roomId = rs.getInt("room_id");
+                Integer managerId = rs.getInt("manager_id");
+                allRoomMembers.put(roomId, new ArrayList<>(managerId));
+                roomParticipantsLive.put(roomId, new HashSet<>(managerId));
+            }
+        } catch (SQLException e) {
+        }
+    }
     @PostMapping("/room")
     public ResponseEntity<Response> createRoom(@RequestParam String roomName, @RequestBody Room userRequestRoom) {
         boolean privacy = userRequestRoom.isPrivacy();
@@ -108,7 +122,7 @@ public class RoomController {
         if (!connectionDBInstance.isValueExist(ServerConstants.ROOMS_TABLE, "room_id", roomId)) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new RoomResponse(String.format(ServerConstants.ROOM_ID_NOT_EXISTS, roomId), roomId, null));
         }
-        if (getRoomDetails(roomId).getManagerId() != managerId) {
+        if (isAllowedDeleteRoom(roomId,managerId)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new RoomResponse(String.format(ServerConstants.NO_PERMISSION_DELETE_ROOM, managerId), roomId, null));
         }
         try {

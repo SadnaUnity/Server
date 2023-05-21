@@ -12,7 +12,6 @@ This endpoint creates new room.
 | ----------- | ---- | -------- | ---------------------------------- |
 | managerId     | int  | Yes      | The ID of the admin.        |
 | roomName       | string | Yes      | The name of the room.   |
-| maxCapacity       | int | No      | Max users in the room in the same time.  Default: 10 |
 | privacy       | boolean | No      | Indicates whether the room is private (TRUE) or public (FALSE). Default: False    |
 
 **Example Request:**  
@@ -21,7 +20,6 @@ POST /room?roomName=maiRoom
 body:
 ```json
 {
-  "maxCapacity":50,
   "privacy" : true,
   "managerId":1
 }
@@ -29,14 +27,37 @@ body:
 **Example Response:**  
 ```json
 {
-  "message": "Room: 'maiRoom' created successfully",
-  "roomId": 11,
+  "message": "Completed successfully",
+  "roomId": 1,
   "room": {
     "privacy": false,
-    "maxCapacity": 50,
     "managerId": 1,
-    "roomId": 11,
-    "roomName": "mai's_room"
+    "roomId": 1,
+    "posters": [
+      {
+        "posterName": "htrtrfghfgh",
+        "fileUrl": "https://storage.googleapis.com/download/storage/v1/b/posters-sadna/o/c3c31ecce?generation=16836277116&alt=media",
+        "roomId": 1,
+        "userId": 1,
+        "posterId": 13,
+        "position": {
+          "x": 0.0,
+          "y": 0.0
+        }
+      },
+      {
+        "posterName": "postername",
+        "fileUrl": "https://storage.googleapis.com/download/storage/v1/b/posters-sadna/o/68b503b336?generation=16835631&alt=media",
+        "roomId": 1,
+        "userId": 1,
+        "posterId": 14,
+        "position": {
+          "x": 0.0,
+          "y": 0.0
+        }
+      }
+    ],
+    "roomName": "mai"
   }
 }
 ```
