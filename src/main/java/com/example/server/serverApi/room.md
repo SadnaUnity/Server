@@ -13,6 +13,7 @@ This endpoint creates new room.
 | managerId     | int  | Yes      | The ID of the admin.        |
 | roomName       | string | Yes      | The name of the room.   |
 | privacy       | boolean | No      | Indicates whether the room is private (TRUE) or public (FALSE). Default: False    |
+| description       | string | No      | room description    |
 
 **Example Request:**  
 
@@ -21,7 +22,8 @@ body:
 ```json
 {
   "privacy" : true,
-  "managerId":1
+  "managerId" : 1,
+  "description" : "hi..."
 }
 ```
 **Example Response:**  
