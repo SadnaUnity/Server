@@ -17,6 +17,7 @@ import java.util.Map;
 public class ChatController implements WebSocketHandler {
     private Map<WebSocketSession,Integer> usersSessions = new HashMap<>();
     private Map<Integer,List<WebSocketSession> > roomSockets = new HashMap<>();
+    private Map<Integer,String > userName = new HashMap<>();
     private final ControllerManager controllerManager;
     @Autowired
     public ChatController(@Lazy ControllerManager controllerManager) {
@@ -34,6 +35,8 @@ public class ChatController implements WebSocketHandler {
 
         // Map the session to the user ID
         usersSessions.put(session, userId);
+
+        userName.put(userId, controllerManager.getUserName(userId));
     }
     @Override
     public void handleMessage(WebSocketSession session, WebSocketMessage<?> message) throws Exception {
@@ -62,7 +65,7 @@ public class ChatController implements WebSocketHandler {
     private void broadcastMessage(WebSocketSession session, String messageContent) throws IOException {
         List<WebSocketSession> sessionList = getSessionList(session);
         Integer userId = usersSessions.get(session);
-        String textMessage = "user " + userId + ": " + messageContent;
+        String textMessage = userName.get(userId) + ": " + messageContent;
         for (WebSocketSession webSocketSession : sessionList) {
             webSocketSession.sendMessage(new TextMessage(textMessage));
         }
