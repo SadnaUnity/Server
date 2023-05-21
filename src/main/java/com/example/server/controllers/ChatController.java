@@ -18,14 +18,12 @@ public class ChatController implements WebSocketHandler {
     private Map<WebSocketSession,Integer> usersSessions = new HashMap<>();
     private Map<Integer,List<WebSocketSession> > roomSockets = new HashMap<>();
     private final ControllerManager controllerManager;
-
-
     @Autowired
     public ChatController(@Lazy ControllerManager controllerManager) {
         this.controllerManager = controllerManager;
     }
     @Override
-    public void afterConnectionEstablished(WebSocketSession session) throws Exception {
+    public void afterConnectionEstablished(WebSocketSession session) {
         Integer userId = Integer.valueOf(session.getHandshakeHeaders().get("userID").get(0));
         Integer roomId = controllerManager.findRoomIdByUserId(userId);
 
@@ -43,11 +41,11 @@ public class ChatController implements WebSocketHandler {
         broadcastMessage(session,payload);
     }
     @Override
-    public void handleTransportError(WebSocketSession session, Throwable exception) throws Exception {
+    public void handleTransportError(WebSocketSession session, Throwable exception) {
         // Handle transport error
     }
     @Override
-    public void afterConnectionClosed(WebSocketSession session, CloseStatus closeStatus) throws Exception {
+    public void afterConnectionClosed(WebSocketSession session, CloseStatus closeStatus) {
         // Remove the session from usersSessions map
         Integer userID = usersSessions.remove(session);
 
