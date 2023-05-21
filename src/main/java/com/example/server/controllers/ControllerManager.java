@@ -63,4 +63,7 @@ public class ControllerManager {
     public Integer getRoomManager(Integer roomId) {
         return roomController.getRoomManager(roomId);
     }
+    public String getUserName(Integer userId){
+        return loginController.getUserName(userId);
+    }
 }

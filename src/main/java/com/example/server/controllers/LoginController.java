@@ -99,5 +99,24 @@ public class LoginController {
             return user_id;
         }
     }
+    public String getUserName(Integer userId) {
+        String username = null;
+        try {
+            String query = "SELECT username FROM users WHERE user_id = ?";
+            try (PreparedStatement statement = connectionDB.prepareStatement(query)) {
+                statement.setInt(1, userId);
+                ResultSet resultSet = statement.executeQuery();
+                if (resultSet.next()) {
+                    username = resultSet.getString("username");
+                }
+            }
+            return username;
+        } catch (SQLException e) {
+            System.out.println("Error: " + e.getMessage());
+        } finally {
+            return username;
+        }
+    }
+
 
 }
