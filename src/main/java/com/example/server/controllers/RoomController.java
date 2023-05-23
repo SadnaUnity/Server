@@ -310,7 +310,7 @@ public class RoomController {
             joinRoomRequestsByManager = new ArrayList<>();
             joinRoomRequestMap.put(managerId, joinRoomRequestsByManager);
         }
-        JoinRoomRequest joinRoomRequest = new JoinRoomRequest(userId, roomId, JoinRoomRequest.RequestStatus.PENDING);
+        JoinRoomRequest joinRoomRequest = new JoinRoomRequest(userId, roomId, JoinRoomRequest.RequestStatus.PENDING,controllerManager.getUserName(userId));
         joinRoomRequestsByManager.add(joinRoomRequest);
         return joinRoomRequest;
     }
