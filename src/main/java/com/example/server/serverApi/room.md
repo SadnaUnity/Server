@@ -319,11 +319,13 @@ Content-Type: application/json
   "joinRoomRequests": [
     {
       "userId": 2,
+      "username": "name",
       "roomId": 3,
       "requestStatus": "PENDING"
     },
     {
       "userId": 1,
+      "username": "name",
       "roomId": 3,
       "requestStatus": "PENDING"
     }
@@ -356,6 +358,7 @@ Content-Type: application/json
   "message": "Your join request has been sent successfully",
   "joinRoomRequests": {
     "userId": 1,
+    "username": "name",
     "roomId": 3,
     "requestStatus": "PENDING"
   }
@@ -398,9 +401,10 @@ GET /completedRequests?userId=123
     "message": "Message data",
     "joinRoomRequests": [
         {
-        "userId": 7,
-        "roomId": 3,
-        "requestStatus": "DECLINED"
+          "userId": 7, 
+          "username": "name",
+          "roomId": 3,
+          "requestStatus": "DECLINED"
       }
     ]
 }
@@ -441,11 +445,13 @@ Request Body:
 [
     {
         "userId": 7,
+        "username": "name",
         "roomId": 3,
         "requestStatus": "DECLINED"
     },
     {
         "userId": 8,
+        "username": "name",
         "roomId": 3,
         "requestStatus": "APPROVED"
     }
@@ -461,6 +467,7 @@ Content-Type: application/json
   "joinRoomRequests": [
     {
       "userId": 7,
+      "username": "name",
       "roomId": 3,
       "requestStatus": "DECLINED"
     }
@@ -468,6 +475,7 @@ Content-Type: application/json
   "notHandledJoinRoomRequests": [
     {
       "userId": 8,
+      "username": "name",
       "roomId": 3,
       "requestStatus": "APPROVED"
     }
@@ -513,6 +521,7 @@ Content-Type: application/json
 [
   {
     "userId": 6,
+    "username": "name",
     "roomId": 3,
     "requestStatus": "DECLINED"
   }
@@ -527,6 +536,7 @@ Content-Type: application/json
   "joinRoomRequests": [
     {
       "userId": 6,
+      "username": "name",
       "roomId": 3,
       "requestStatus": "DECLINED"
     }
