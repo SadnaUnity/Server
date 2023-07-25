@@ -1,17 +1,15 @@
 package com.example.server.entities;
 
-import java.util.List;
-
 public class RoomStatus {
     private boolean privacy;
     private int managerId;
     private int roomId;
     private String roomName;
     private String description;
-//    private List<Hall> roomParticipant;
+    private String imageUrl;
     private RoomMemberStatus roomMemberStatus;
     private JoinRoomRequest.RequestStatus requestStatus;
-    public RoomStatus(Boolean privacy, int managerId, int roomId, String roomName, String description, RoomStatus.RoomMemberStatus roomMemberStatus, JoinRoomRequest.RequestStatus requestStatus) {
+    public RoomStatus(Boolean privacy, int managerId, int roomId, String roomName, String description, RoomStatus.RoomMemberStatus roomMemberStatus, JoinRoomRequest.RequestStatus requestStatus, String url) {
         this.privacy = (privacy != null) ? privacy : false;
         this.roomId = roomId;
         this.roomName = roomName;
@@ -19,7 +17,11 @@ public class RoomStatus {
         this.description = description;
         this.roomMemberStatus = roomMemberStatus;
         this.requestStatus=requestStatus;
-//        this.roomParticipant=roomParticipant;
+        this.imageUrl = url;
+    }
+
+    public String getImageUrl() {
+        return imageUrl;
     }
 
     public JoinRoomRequest.RequestStatus getRequestStatus() {
