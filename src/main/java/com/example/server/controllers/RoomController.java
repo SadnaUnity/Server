@@ -127,6 +127,12 @@ public class RoomController {
 //    }
     @PostMapping("/roomImage/{roomId}")
     public ResponseEntity<Response> updateRoomImage(@PathVariable Integer roomId, @RequestParam Integer userId, @RequestPart MultipartFile file) {
+        if (!connectionDBInstance.isValueExist(ServerConstants.ROOMS_TABLE, "room_id", roomId)) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new RoomResponse(String.format(ServerConstants.ROOM_ID_NOT_EXISTS, roomId), null, null));
+        }
+        if (!isUserRoomMember(userId, roomId)) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new RoomResponse(String.format(ServerConstants.USER_NOT_A_ROOM_MEMBER, userId), null, null));
+        }
         if (file.isEmpty()) {
             return badRequestResponse(ServerConstants.IMAGE_EMPTY);
         }
@@ -321,6 +327,9 @@ public class RoomController {
         List<JoinRoomRequest> notHandledRequests = new ArrayList<>();
         String msg = "Request handled";
         List<JoinRoomRequest> userCompletedRequests = completedRequestsMapByUser.get(userId);
+        if(userCompletedRequests==null || userCompletedRequests.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new AllJoinReqResponse(null, "user id: " + userId + " does not have completed request..."));
+        }
         try {
             for (JoinRoomRequest requestToApprove : approvedRequests) {
                 Optional<JoinRoomRequest> optionalMatchingRequest = userCompletedRequests.stream()
@@ -354,7 +363,9 @@ public class RoomController {
             Integer userId = requestToHandle.getUserId();
             Integer roomId = requestToHandle.getRoomId();
             List<JoinRoomRequest> joinRoomRequestsForManager = joinRoomRequestMap.get(managerId);
-
+            if (joinRoomRequestsForManager == null || joinRoomRequestsForManager.isEmpty()) {
+                return false;
+            }
             Optional<JoinRoomRequest> optionalMatchingRequest = joinRoomRequestsForManager.stream()
                     .filter(request -> request.getUserId().equals(userId) && request.getRoomId().equals(roomId))
                     .findFirst();
