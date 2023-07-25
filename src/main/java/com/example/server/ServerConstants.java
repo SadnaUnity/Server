@@ -21,6 +21,7 @@ public class ServerConstants {
     public static final String ROOM_CREATED_SUCCESSFULLY = "Room: '%s' created successfully";
     public static final String USER_CHANGED_ROOM_SUCCESSFULLY = "User Id: '%s' moved into room Id: '%s' successfully";
     public static final String AVATAR_UPDATED_SUCCESSFULLY = "Avatar properties updated successfully";
+    public static final String ROOM_UPDATED_SUCCESSFULLY = "Room properties updated successfully";
     public static final String LOGOUT_MESSAGE = "Bye Bye...";
     public static final String POSITION_UPDATED_SUCCESSFULLY = "Position updated successfully!";
     public static final String USER_CREATED_SUCCESSFULLY = "User: '%s' created successfully";

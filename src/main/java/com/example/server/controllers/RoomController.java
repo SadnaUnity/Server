@@ -4,6 +4,9 @@ import com.example.server.Database;
 import com.example.server.ServerConstants;
 import com.example.server.entities.*;
 import com.example.server.response.*;
+import com.google.auth.oauth2.GoogleCredentials;
+import com.google.cloud.storage.*;
+import com.google.cloud.storage.Blob;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
@@ -11,32 +14,43 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.sql.*;
 import java.util.*;
+
+import static com.example.server.response.Response.badRequestResponse;
 
 @RestController
 @Component
 public class RoomController {
     Database connectionDBInstance;
     Connection connectionDB;
+    Storage gcpStorage;
+
     private final ControllerManager controllerManager;
     Map<Integer, Set<Integer>> roomParticipantsLive; // ROOM ID 1 is default room
-    Map<Integer, List<Integer>> allRoomMembers;//room = userId
-    Map<Integer, List<JoinRoomRequest>> joinRoomRequestMap; //mangerId - request
-    Map<Integer, List<JoinRoomRequest>> completedRequestsMapByUser; //userId - request
+    Map<Integer, List<Integer>> allRoomMembers;//room = userId - for each room - who are the approved user
+    Map<Integer, List<JoinRoomRequest>> joinRoomRequestMap; //mangerId - request - for each manager id - all request that are pending
+    Map<Integer, List<JoinRoomRequest>> completedRequestsMapByUser; //userId - request - for each user id - all requests that approved or declined
 
     @Autowired
     public RoomController(@Lazy ControllerManager controllerManager) {
-        this.controllerManager = controllerManager;
-        connectionDBInstance = Database.getInstance();
-        connectionDB = connectionDBInstance.getConnection();
-        roomParticipantsLive = new HashMap<>();
-        roomParticipantsLive.put(ServerConstants.DEFAULT_ROOM, new HashSet<>());
-        allRoomMembers = new HashMap<>();
-        joinRoomRequestMap = new HashMap<>();
-        completedRequestsMapByUser = new HashMap<>();
-        justForUs();
+        try {
+            this.controllerManager = controllerManager;
+            connectionDBInstance = Database.getInstance();
+            connectionDB = connectionDBInstance.getConnection();
+            roomParticipantsLive = new HashMap<>();
+            roomParticipantsLive.put(ServerConstants.DEFAULT_ROOM, new HashSet<>());
+            allRoomMembers = new HashMap<>();
+            joinRoomRequestMap = new HashMap<>();
+            completedRequestsMapByUser = new HashMap<>();
+            justForUs();
+            gcpStorage = StorageOptions.newBuilder().setProjectId(ServerConstants.PROJECT_ID).setCredentials(GoogleCredentials.fromStream(getClass().getResourceAsStream("/credentialsData.json"))).build().getService();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public void justForUs() {
@@ -46,10 +60,118 @@ public class RoomController {
             while (rs.next()) {
                 Integer roomId = rs.getInt("room_id");
                 Integer managerId = rs.getInt("manager_id");
-                allRoomMembers.put(roomId, new ArrayList<>(managerId));
-                roomParticipantsLive.put(roomId, new HashSet<>(managerId));
+                allRoomMembers.put(roomId, new ArrayList<>());
+                allRoomMembers.get(roomId).add(managerId);
+                roomParticipantsLive.put(roomId, new HashSet<>());
+                roomParticipantsLive.get(roomId).add(managerId);
             }
         } catch (SQLException e) {
+        }
+    }
+    public void addAllManagerIdIntoRoom() { //in case of server dead
+        try {
+            PreparedStatement stmt = connectionDB.prepareStatement("SELECT * FROM rooms");
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                Integer roomId = rs.getInt("room_id");
+                Integer managerId = rs.getInt("manager_id");
+                allRoomMembers.put(roomId, new ArrayList<>());
+                allRoomMembers.get(roomId).add(managerId);
+            }
+        } catch (SQLException e) {
+        }
+    }
+//    @PostMapping("/room")
+//    public ResponseEntity<Response> createRoom(@RequestParam String roomName, @RequestParam String description, @RequestParam Integer managerId, @RequestParam String background, @RequestPart MultipartFile file, @RequestParam boolean privacy) {
+//        System.out.println(roomName);
+//        System.out.println(description);
+//        System.out.println(managerId);
+//        System.out.println(background);
+//        System.out.println(privacy);
+//        System.out.println(file);
+//        if (file.isEmpty()) {
+//            return badRequestResponse(ServerConstants.IMAGE_EMPTY);
+//        }
+//        if (file.getSize() > 10485760) {
+//            return badRequestResponse(ServerConstants.FILE_TOO_BIG);
+//        }
+//
+//        if (connectionDBInstance.isValueExist(ServerConstants.ROOMS_TABLE, "room_name", roomName)) {
+//            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new RoomResponse(String.format(ServerConstants.ROOM_EXISTS, roomName), null, null));
+//        }
+//        if (!connectionDBInstance.isValueExist(ServerConstants.USERS_TABLE, "user_id", managerId)) {
+//            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new RoomResponse(String.format(ServerConstants.ROOM_EXISTS, roomName), null, null));
+//        }
+//        String roomImageId = UUID.randomUUID().toString();
+//        BlobId blobId = BlobId.of(ServerConstants.BUCKET_NAME, roomImageId);
+//        BlobInfo blobInfo = BlobInfo.newBuilder(blobId).setContentType(file.getContentType()).build();
+//        byte[] fileData ;
+//        String url;
+//        try {
+//            fileData = file.getBytes();
+//            Blob blob = gcpStorage.create(blobInfo, fileData);
+//            url = blob.getMediaLink();
+//        } catch (IOException e) {
+//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new RoomResponse(ServerConstants.FILE_UPLOAD_FAILED, null, null));
+//        }
+//        Room room = addNewRoomToDB(roomName, Integer.valueOf(managerId), privacy, description, Room.Background.valueOf(background), url);
+//        int roomId = room.getRoomId();
+//        allRoomMembers.put(roomId, new ArrayList<>());
+//        allRoomMembers.get(room.getRoomId()).add(room.getManagerId());
+//        if (room != null) {
+//            roomParticipantsLive.put(room.getRoomId(), new HashSet<>());
+//            return ResponseEntity.status(HttpStatus.OK).body(new RoomResponse(String.format(ServerConstants.ROOM_CREATED_SUCCESSFULLY, roomName), room.getRoomId(), room));
+//        } else {
+//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new RoomResponse(ServerConstants.UNEXPECTED_ERROR, null, room));
+//        }
+//    }
+    @PostMapping("/roomImage/{roomId}")
+    public ResponseEntity<Response> updateRoomImage(@PathVariable Integer roomId, @RequestParam Integer userId, @RequestPart MultipartFile file) {
+        if (file.isEmpty()) {
+            return badRequestResponse(ServerConstants.IMAGE_EMPTY);
+        }
+        if (file.getSize() > 10485760) {
+            return badRequestResponse(ServerConstants.FILE_TOO_BIG);
+        }
+        String roomImageId = UUID.randomUUID().toString();
+        BlobId blobId = BlobId.of(ServerConstants.BUCKET_NAME, roomImageId);
+        BlobInfo blobInfo = BlobInfo.newBuilder(blobId).setContentType(file.getContentType()).build();
+        byte[] fileData;
+        String url;
+        try {
+            fileData = file.getBytes();
+            Blob blob = gcpStorage.create(blobInfo, fileData);
+            url = blob.getMediaLink();
+        } catch (IOException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new RoomResponse(ServerConstants.FILE_UPLOAD_FAILED, null, null));
+        }
+        if (updateRoomURL(roomId, url)) {
+            return ResponseEntity.status(HttpStatus.OK).body(new RoomResponse(String.format(ServerConstants.ROOM_UPDATED_SUCCESSFULLY), roomId, getRoomDetails(roomId)));
+        } else {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new RoomResponse(ServerConstants.FILE_UPLOAD_FAILED, null, null));
+        }
+    }
+
+    public boolean updateRoomURL(int roomId, String newUrl) {
+        boolean urlUpdated = false;
+        try {
+            // Prepare the update query
+            String updateQuery = "UPDATE rooms SET url = ? WHERE room_id = ?";
+            PreparedStatement preparedStatement = connectionDB.prepareStatement(updateQuery);
+
+            // Set the parameters for the query
+            preparedStatement.setString(1, newUrl);
+            preparedStatement.setInt(2, roomId);
+
+            // Execute the update query
+            int rowsAffected = preparedStatement.executeUpdate();
+            if (rowsAffected > 0) {
+                urlUpdated = true;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            return urlUpdated;
         }
     }
     @PostMapping("/room")
@@ -57,14 +179,17 @@ public class RoomController {
         boolean privacy = userRequestRoom.isPrivacy();
         int managerId = userRequestRoom.getManagerId();
         String description = userRequestRoom.getDescription();
+        Room.Background background = userRequestRoom.getBackground();
         if (connectionDBInstance.isValueExist(ServerConstants.ROOMS_TABLE, "room_name", roomName)) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new RoomResponse(String.format(ServerConstants.ROOM_EXISTS, roomName), null, null));
         }
         if (!connectionDBInstance.isValueExist(ServerConstants.USERS_TABLE, "user_id", managerId)) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new RoomResponse(String.format(ServerConstants.ROOM_EXISTS, roomName), null, null));
         }
-        Room room = addNewRoomToDB(roomName, managerId, privacy, description);
-        allRoomMembers.put(room.getRoomId(), new ArrayList<>(room.getManagerId()));
+        Room room = addNewRoomToDB(roomName, managerId, privacy, description, background, null);
+        int roomId = room.getRoomId();
+        allRoomMembers.put(roomId, new ArrayList<>());
+        allRoomMembers.get(room.getRoomId()).add(room.getManagerId());
         if (room != null) {
             roomParticipantsLive.put(room.getRoomId(), new HashSet<>());
             return ResponseEntity.status(HttpStatus.OK).body(new RoomResponse(String.format(ServerConstants.ROOM_CREATED_SUCCESSFULLY, roomName), room.getRoomId(), room));
@@ -320,6 +445,8 @@ public class RoomController {
         Integer managerId;
         String roomName;
         String description;
+        Room.Background background;
+        String url;
         try {
             PreparedStatement stmt = connectionDB.prepareStatement("SELECT * FROM rooms WHERE room_id = ?");
             stmt.setInt(1, roomId);
@@ -329,19 +456,22 @@ public class RoomController {
                 managerId = rs.getInt("manager_id");
                 roomName = rs.getString("room_name");
                 description = rs.getString("description");
+                background = Room.Background.valueOf(rs.getString("background"));
+                url = rs.getString("url");
+
             } else {
                 return null;
             }
 
             List<Poster> allPostersInRoom = controllerManager.getAllPostersInRoom(roomId);
-            return new Room(privacy, managerId, roomId, roomName, allPostersInRoom, description);
+            return new Room(privacy, managerId, roomId, roomName, allPostersInRoom, description, background, url);
         } catch (SQLException e) {
             return null;
         }
     }
 
-    public Room addNewRoomToDB(String roomName, Integer managerId, boolean privacy, String description) {
-        String insertSql = "INSERT INTO rooms (manager_id, room_name, privacy, description) VALUES (?,?,?,?)";
+    public Room addNewRoomToDB(String roomName, Integer managerId, boolean privacy, String description, Room.Background background, String url) {
+        String insertSql = "INSERT INTO rooms (manager_id, room_name, privacy, description, background, url) VALUES (?,?,?,?,?,?)";
         Integer roomId = null;
         Room room = null;
         boolean roomCreated = false;
@@ -351,13 +481,15 @@ public class RoomController {
             stmt.setString(2, roomName);
             stmt.setBoolean(3, privacy);
             stmt.setString(4, description);
+            stmt.setString(5, String.valueOf(background));
+            stmt.setString(6, url);
             stmt.executeUpdate();
             roomCreated = true;
 
             ResultSet rs = stmt.getGeneratedKeys();
             if (rs.next()) {
                 roomId = rs.getInt(1);
-                room = new Room(privacy, managerId, roomId, roomName, null, description);
+                room = new Room(privacy, managerId, roomId, roomName, null, description, background,url);
             }
             stmt.close();
         } catch (SQLException e) {

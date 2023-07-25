@@ -14,7 +14,7 @@ public class Poster {
         this.roomId = roomId;
         this.userId = userId;
         this.posterId = posterId;
-        this.position=position;
+        this.position = position;
     }
 
     public Position getPosition() {

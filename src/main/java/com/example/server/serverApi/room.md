@@ -65,6 +65,51 @@ body:
 ```
 ---
 
+## Endpoint: Update Room Image
+
+## Description:
+This endpoint allows users to update the image of a room identified by the given `roomId`. The request must include a valid image file as a `multipart/form-data` in the `file` parameter. The image is uploaded to Google Cloud Storage (GCS), and its URL is associated with the room by updating the 'url' column in the database.
+
+## Request:
+- **URL:** `/roomImage/{roomId}`
+- **Method:** POST
+- **Headers:**
+  - Content-Type: `multipart/form-data`
+
+- **Path Parameters:**
+  - `roomId` (Integer): The unique identifier of the room for which the image will be updated.
+- **Request Parameters:**
+  - `userId` (Integer): The ID of the user making the request.
+- **Request Body:**
+  - `file` (MultipartFile): The image file to be uploaded.
+
+## Response:
+- **HTTP Status:**
+  - 200 OK - The room image was updated successfully.
+  - 400 Bad Request - The request was invalid (e.g., empty image file or file too big).
+  - 500 Internal Server Error - An unexpected error occurred during the image upload or database update process.
+- **Response Body (JSON):**
+  - `roomId` (Integer): The ID of the room for which the image was updated.
+  - `message` (String): A message describing the result of the operation.
+  - `roomDetails` (Object): Details of the updated room.
+
+## Request Example:
+POST /roomImage/123 HTTP/1.1
+
+## Successful Response Example:
+ ```json
+{
+  "roomId": 123,
+  "message": "Room image updated successfully.",
+  "roomDetails": {
+    "roomId": 123,
+    "roomName": "Example Room",
+    "url": "https://storage.googleapis.com/example-bucket/room_images/room_image.jpg",
+    "otherDetails": "Other room details..."
+  }
+}
+```
+
 ## `/getIntoRoom`
 This endpoint is used to move a user into a specific room.
 **URL:** `/getIntoRoom`

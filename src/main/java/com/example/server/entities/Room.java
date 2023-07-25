@@ -9,15 +9,29 @@ public class Room {
     private List<Poster> posters;
     private String roomName;
     private String description;
+    private Background background;
     private List<Hall> roomParticipant;
-    public Room(Boolean privacy, int managerId, int roomId, String roomName, List<Poster> posters, String description) {
+
+    private String groupImage;
+
+    public Room(Boolean privacy, int managerId, int roomId, String roomName, List<Poster> posters, String description, Background background, String groupImage) {
         this.privacy = (privacy != null) ? privacy : false;
         this.roomId = roomId;
         this.roomName = roomName;
         this.managerId = managerId;
         this.posters = (posters != null) ? posters : null;
         this.description=description;
+        this.background = background;
+        this.groupImage = groupImage;
 //        this.roomParticipant=roomParticipant;
+    }
+
+    public String getGroupImage() {
+        return groupImage;
+    }
+
+    public Background getBackground() {
+        return background;
     }
 
     public String getDescription() {
@@ -44,4 +58,7 @@ public class Room {
         return privacy;
     }
 
+    public enum Background {
+        BACKGROUND_1, BACKGROUND_2, BACKGROUND_3, BACKGROUND_4
+    }
 }
