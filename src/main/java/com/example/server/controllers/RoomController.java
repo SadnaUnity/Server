@@ -404,6 +404,7 @@ public class RoomController {
                 String description = rs.getString("description");
                 Boolean privacy = rs.getBoolean("privacy");
                 Integer managerId = rs.getInt("manager_id");
+                String url = rs.getString("url");
                 RoomStatus.RoomMemberStatus roomMembershipStatus = RoomStatus.RoomMemberStatus.NOT_A_MEMBER;
                 JoinRoomRequest.RequestStatus joinRoomRequestStatus = null;
                 if (isUserRoomMember(userId, roomId)) {
@@ -411,7 +412,7 @@ public class RoomController {
                 } else {
                     joinRoomRequestStatus = getRequestStatus(userId, managerId, roomId);
                 }
-                roomStatuses.add(new RoomStatus(privacy, managerId, roomId, roomName, description, roomMembershipStatus, joinRoomRequestStatus));
+                roomStatuses.add(new RoomStatus(privacy, managerId, roomId, roomName, description, roomMembershipStatus, joinRoomRequestStatus,url));
             }
         } catch (SQLException e) {
         } finally {
