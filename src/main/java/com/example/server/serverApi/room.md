@@ -350,6 +350,7 @@ Content-Type: application/json
       "roomId": 2,
       "roomName": "shaked",
       "description": null,
+      "imageUrl": null,
       "roomMemberStatus": "NOT_A_MEMBER",
       "requestStatus": null
     },
@@ -359,6 +360,7 @@ Content-Type: application/json
       "roomId": 3,
       "roomName": "inbal",
       "description": null,
+      "imageUrl": null,
       "roomMemberStatus": "NOT_A_MEMBER",
       "requestStatus": "PENDING"
     }
