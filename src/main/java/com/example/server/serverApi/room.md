@@ -248,6 +248,9 @@ GET /room/123
     "maxCapacity": 10,
     "roomId": 123,
     "roomName": "Example Room",
+    "description": "Everything you want to know about the show (season 2)!",
+    "background": "BACKGROUND_3",
+    "groupImage": "https://storage.googleapis.com/download/storage/v1/b/posters-sadna/o/b520fdfa-af5b-424d-bff1-3abe3d9c3f70?    generation=1690294324685314&alt=media"
     "posters": [
        {
             "posterName": "firstPoster,firstPoster",
