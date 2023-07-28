@@ -8,12 +8,13 @@ This endpoint creates new room.
 
 **Request Body:**
 
-| Field       | Type | Required | Description                        |
-| ----------- | ---- | -------- | ---------------------------------- |
-| managerId     | int  | Yes      | The ID of the admin.        |
-| roomName       | string | Yes      | The name of the room.   |
-| privacy       | boolean | No      | Indicates whether the room is private (TRUE) or public (FALSE). Default: False    |
-| description       | string | No      | room description    |
+| Field       | Type | Required | Description                                                                    |
+| ----------- | ---- | -------- |--------------------------------------------------------------------------------|
+| managerId     | int  | Yes      | The ID of the admin.                                                           |
+| roomName       | string | Yes      | The name of the room.                                                          |
+| privacy       | boolean | No      | Indicates whether the room is private (TRUE) or public (FALSE). Default: False |
+| description       | string | No      | room description                                                               |
+| background       | string | No      | room background. values: BACKGROUND_1,BACKGROUND_2,BACKGROUND_3,BACKGROUND_4   |
 
 **Example Request:**  
 
@@ -23,7 +24,8 @@ body:
 {
   "privacy" : true,
   "managerId" : 1,
-  "description" : "hi..."
+  "description" : "hi...",
+  "background" : "BACKGROUND_3"
 }
 ```
 **Example Response:**  
