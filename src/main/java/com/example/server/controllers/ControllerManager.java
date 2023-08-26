@@ -18,15 +18,17 @@ public class ControllerManager {
     private PosterController posterController;
     private RoomController roomController;
     private ChatController chatController;
+    private ChatHttp chatHttp;
 
     @Autowired
-    public ControllerManager(AvatarController avatarController, LoginController loginController, MovingController movingController, PosterController posterController, RoomController roomController, ChatController chatController) {
+    public ControllerManager(AvatarController avatarController, LoginController loginController, MovingController movingController, PosterController posterController, RoomController roomController, ChatController chatController, ChatHttp chatHttp) {
         this.avatarController = avatarController;
         this.loginController = loginController;
         this.movingController = movingController;
         this.posterController = posterController;
         this.roomController = roomController;
         this.chatController = chatController;
+        this.chatHttp = chatHttp;
 //        this.connectionDB = database.getConnection();
     }
     public Avatar addNewAvatarToSystem(Integer userId, Avatar.Color color, Avatar.Accessory accessory) {
