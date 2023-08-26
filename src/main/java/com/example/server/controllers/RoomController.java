@@ -212,8 +212,8 @@ public class RoomController {
             }
             removeUserFromRoom(userId);
             insertUserIdIntoRoom(userId, roomId);
-            controllerManager.removeUserFromChatRoom(ServerConstants.DEFAULT_ROOM);
-            controllerManager.addUserIntoChatRoom(userId, roomId);
+//            controllerManager.removeUserFromChatRoom(ServerConstants.DEFAULT_ROOM);
+//            controllerManager.addUserIntoChatRoom(userId, roomId);
             return ResponseEntity.status(HttpStatus.OK).body(new RoomResponse(String.format(ServerConstants.USER_CHANGED_ROOM_SUCCESSFULLY, userId, roomId), roomId, getRoomDetails(roomId)));
         } catch (Exception err) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new RoomResponse(ServerConstants.UNEXPECTED_ERROR, 1, getRoomDetails(ServerConstants.DEFAULT_ROOM)));
@@ -225,7 +225,7 @@ public class RoomController {
         try {
             removeUserFromRoom(userId);
             insertUserIdIntoRoom(userId, ServerConstants.DEFAULT_ROOM);
-            controllerManager.removeUserFromChatRoom(userId);
+//            controllerManager.removeUserFromChatRoom(userId);
             return ResponseEntity.status(HttpStatus.OK).body(new HallResponse(getHallDetails(userId), "hall data"));
         } catch (Exception err) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new HallResponse(getHallDetails(userId), ServerConstants.UNEXPECTED_ERROR));

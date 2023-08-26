@@ -1,115 +1,73 @@
 package com.example.server.controllers;
+import com.example.server.ServerConstants;
+import com.example.server.entities.ChatMessage;
+import com.example.server.response.AllLastMessages;
+import com.example.server.response.ChatResponse;
+import com.example.server.response.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
-import org.springframework.web.socket.CloseStatus;
-import org.springframework.web.socket.TextMessage;
-import org.springframework.web.socket.WebSocketHandler;
-import org.springframework.web.socket.WebSocketMessage;
-import org.springframework.web.socket.WebSocketSession;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import org.springframework.web.bind.annotation.*;
+import java.util.*;
 
+@RestController
 @Component
-public class ChatController implements WebSocketHandler {
-    private Map<WebSocketSession,Integer> usersSessions = new HashMap<>();
-    private Map<Integer,List<WebSocketSession> > roomSockets = new HashMap<>();
-    private Map<Integer,String > userName = new HashMap<>();
-    private final ControllerManager controllerManager;
+public class ChatController {
+    private ControllerManager controllerManager;
+    private Map<Integer,List<ChatMessage>> messages;
+
     @Autowired
     public ChatController(@Lazy ControllerManager controllerManager) {
         this.controllerManager = controllerManager;
+        messages = new HashMap<>();
     }
-    @Override
-    public void afterConnectionEstablished(WebSocketSession session) {
-        Integer userId = Integer.valueOf(session.getHandshakeHeaders().get("userID").get(0));
-        Integer roomId = controllerManager.findRoomIdByUserId(userId);
 
-        // Add the session to the corresponding room sockets list
-        List<WebSocketSession> roomSocketsList = roomSockets.getOrDefault(roomId, new ArrayList<>());
-        roomSocketsList.add(session);
-        roomSockets.put(roomId, roomSocketsList);
-
-        // Map the session to the user ID
-        usersSessions.put(session, userId);
-
-        userName.put(userId, controllerManager.getUserName(userId));
-    }
-    @Override
-    public void handleMessage(WebSocketSession session, WebSocketMessage<?> message) throws Exception {
-        String payload = (String) message.getPayload();
-        broadcastMessage(session,payload);
-    }
-    @Override
-    public void handleTransportError(WebSocketSession session, Throwable exception) {
-        // Handle transport error
-    }
-    @Override
-    public void afterConnectionClosed(WebSocketSession session, CloseStatus closeStatus) {
-        // Remove the session from usersSessions map
-        Integer userID = usersSessions.remove(session);
-
-        // Remove the session from roomSockets map
-        for (Map.Entry<Integer, List<WebSocketSession>> entry : roomSockets.entrySet()) {
-            List<WebSocketSession> roomSocketsList = entry.getValue();
-            roomSocketsList.remove(session);
+    @PutMapping("/echo")
+    public ResponseEntity<Response> addMessage(@RequestBody ChatMessage message, @RequestParam Integer userId, @RequestParam Integer roomId) {
+        try {
+            String content = message.getContent();
+            String sender = message.getSender();
+            long timestamp = message.getTimestamp();
+            if(!controllerManager.isUserInRoom(userId,roomId)) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ChatResponse(message, userId, String.format(ServerConstants.USER_NOT_A_ROOM_MEMBER, userId)));
+            }
+            if(!messages.containsKey(roomId)){
+                List<ChatMessage> roomMessages = new ArrayList<>();
+                messages.put(roomId,roomMessages);
+            }
+            messages.get(roomId).add(new ChatMessage(content, sender, timestamp));
+            return ResponseEntity.ok().body(new ChatResponse(message,userId,"message sent successfully."));
+        } catch (Exception exception){
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ChatResponse(message, userId, ServerConstants.UNEXPECTED_ERROR));
         }
     }
-    @Override
-    public boolean supportsPartialMessages() {
-        return false;
-    }
-    private void broadcastMessage(WebSocketSession session, String messageContent) throws IOException {
-        List<WebSocketSession> sessionList = getSessionList(session);
-        Integer userId = usersSessions.get(session);
-        String textMessage = userName.get(userId) + ": " + messageContent;
-        for (WebSocketSession webSocketSession : sessionList) {
-            webSocketSession.sendMessage(new TextMessage(textMessage));
+    @GetMapping("/chat")
+    public ResponseEntity<Response> getMessagesAfterTimestamp(@RequestParam Integer userId, @RequestParam Integer roomId, @RequestParam long timestamp) {
+        if(!controllerManager.isUserInRoom(userId,roomId)) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ChatResponse(null, userId, String.format(ServerConstants.USER_NOT_A_ROOM_MEMBER, userId)));
         }
-    }
-    private List<WebSocketSession> getSessionList(WebSocketSession session) {
-        for (Map.Entry<Integer, List<WebSocketSession>> entry : roomSockets.entrySet()) {
-            List<WebSocketSession> roomSocketsList = entry.getValue();
-            if(roomSocketsList.contains(session)){
-                return roomSocketsList;
+        List<ChatMessage> result = new ArrayList<>();
+        for (ChatMessage message : messages.get(roomId)) {
+            if (message.getTimestamp() > timestamp) {
+                result.add(message);
             }
         }
-        return null;
+        return ResponseEntity.ok().body(new AllLastMessages(result,"messages received successfully."));
     }
-    public void removeUserFromChatRoom(int userId){
-        WebSocketSession userSession = getSessionByUserId(userId);
-        //remove user session from old room
-        for (Map.Entry<Integer, List<WebSocketSession>> entry : roomSockets.entrySet()) {
-            List<WebSocketSession> roomSocketsList = entry.getValue();
-            if(roomSocketsList.contains(userSession)){
-                roomSocketsList.remove(userSession);
-                break;
+    public void deleteOldMessages() {
+        long currentTime = System.currentTimeMillis();
+        messages.forEach((integer, chatMessages) -> {
+            Iterator<ChatMessage> iterator = chatMessages.iterator();
+            while (iterator.hasNext()) {
+                ChatMessage message = iterator.next();
+                if (currentTime - message.getTimestamp() > 10000) { // 10 seconds in milliseconds
+                    iterator.remove();
+                    break;
+                }
             }
-        }
+        });
     }
-    private WebSocketSession getSessionByUserId(Integer userId) {
-        for (Map.Entry<WebSocketSession, Integer> entry : usersSessions.entrySet()) {
-            if (entry.getValue() == userId) {
-                return entry.getKey();
-            }
-        }
-        return null;
-    }
-    public void addUserIntoChatRoom(int userId, int newRoomId) {
-        WebSocketSession userSession = getSessionByUserId(userId);
-        if (userSession != null) { // Update the roomSockets map with the new userId
-            List<WebSocketSession> roomSocketsList = roomSockets.get(newRoomId);
-            if (roomSocketsList != null) {
-                roomSocketsList.add(userSession);
-            } else {
-                roomSocketsList = new ArrayList<>();
-                roomSocketsList.add(userSession);
-                roomSockets.put(newRoomId, roomSocketsList);
-            }
-        }
-    }
-
 }
+
