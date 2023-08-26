@@ -68,4 +68,7 @@ public class ControllerManager {
     public String getUserName(Integer userId){
         return loginController.getUserName(userId);
     }
+    public Boolean isUserInRoom(Integer userId, Integer roomId){
+        return roomController.getAllUsersInRoom(roomId).contains(userId);
+    }
 }

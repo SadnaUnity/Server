@@ -31,6 +31,6 @@ public class ChatResponse implements Response, Serializable {
 
     @Override
     public String getMessage() {
-        return null;
+        return message;
     }
 }
