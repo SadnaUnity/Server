@@ -15,7 +15,6 @@ public class ControllerManager {
     private MovingController movingController;
     private PosterController posterController;
     private RoomController roomController;
-//    private ChatController chatController;
     private ChatController chatController;
 
     @Autowired
@@ -66,4 +65,5 @@ public class ControllerManager {
     public Boolean isUserInRoom(Integer userId, Integer roomId){
         return roomController.getAllUsersInRoom(roomId).contains(userId);
     }
+
 }
