@@ -62,8 +62,8 @@ public class RoomController {
                 Integer managerId = rs.getInt("manager_id");
                 allRoomMembers.put(roomId, new ArrayList<>());
                 allRoomMembers.get(roomId).add(managerId);
-                roomParticipantsLive.put(roomId, new HashSet<>());
-                roomParticipantsLive.get(roomId).add(managerId);
+                //roomParticipantsLive.put(roomId, new HashSet<>());
+                //roomParticipantsLive.get(roomId).add(managerId);
             }
         } catch (SQLException e) {
         }

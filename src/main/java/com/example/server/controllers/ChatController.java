@@ -55,26 +55,35 @@ public class ChatController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ChatResponse(null, userId, String.format(ServerConstants.USER_NOT_A_ROOM_MEMBER, userId)));
         }
         List<ChatMessage> result = new ArrayList<>();
-        for (ChatMessage message : messages.get(roomId)) {
-            if (message.getTimestamp() > timestamp) {
-                result.add(message);
+        if(!messages.isEmpty())
+        {
+            for (ChatMessage message : messages.get(roomId)) {
+                if (message.getTimestamp() > timestamp) {
+                    result.add(message);
+                }
             }
         }
+
         return ResponseEntity.ok().body(new AllLastMessages(result,"messages received successfully."));
     }
     public void deleteOldMessages() {
         //System.out.println("delete");
+
         long currentTime = System.currentTimeMillis();
-        messages.forEach((integer, chatMessages) -> {
-            Iterator<ChatMessage> iterator = chatMessages.iterator();
-            while (iterator.hasNext()) {
-                ChatMessage message = iterator.next();
-                if (currentTime - message.getTimestamp() > 10000) { // 10 seconds in milliseconds
-                    iterator.remove();
-                    break;
+        if(!messages.isEmpty())
+        {
+            messages.forEach((integer, chatMessages) -> {
+                Iterator<ChatMessage> iterator = chatMessages.iterator();
+                while (iterator.hasNext()) {
+                    ChatMessage message = iterator.next();
+                    if (currentTime - message.getTimestamp() > 10000) { // 10 seconds in milliseconds
+                        iterator.remove();
+                        break;
+                    }
                 }
-            }
-        });
+            });
+        }
+
     }
 
     @PostConstruct
