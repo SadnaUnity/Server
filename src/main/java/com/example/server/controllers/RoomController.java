@@ -62,8 +62,8 @@ public class RoomController {
                 Integer managerId = rs.getInt("manager_id");
                 allRoomMembers.put(roomId, new ArrayList<>());
                 allRoomMembers.get(roomId).add(managerId);
-                roomParticipantsLive.put(roomId, new HashSet<>());
-                roomParticipantsLive.get(roomId).add(managerId);
+                //roomParticipantsLive.put(roomId, new HashSet<>());
+                //roomParticipantsLive.get(roomId).add(managerId);
             }
         } catch (SQLException e) {
         }
@@ -212,8 +212,8 @@ public class RoomController {
             }
             removeUserFromRoom(userId);
             insertUserIdIntoRoom(userId, roomId);
-            controllerManager.removeUserFromChatRoom(ServerConstants.DEFAULT_ROOM);
-            controllerManager.addUserIntoChatRoom(userId, roomId);
+//            controllerManager.removeUserFromChatRoom(ServerConstants.DEFAULT_ROOM);
+//            controllerManager.addUserIntoChatRoom(userId, roomId);
             return ResponseEntity.status(HttpStatus.OK).body(new RoomResponse(String.format(ServerConstants.USER_CHANGED_ROOM_SUCCESSFULLY, userId, roomId), roomId, getRoomDetails(roomId)));
         } catch (Exception err) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new RoomResponse(ServerConstants.UNEXPECTED_ERROR, 1, getRoomDetails(ServerConstants.DEFAULT_ROOM)));
@@ -225,7 +225,7 @@ public class RoomController {
         try {
             removeUserFromRoom(userId);
             insertUserIdIntoRoom(userId, ServerConstants.DEFAULT_ROOM);
-            controllerManager.removeUserFromChatRoom(userId);
+//            controllerManager.removeUserFromChatRoom(userId);
             return ResponseEntity.status(HttpStatus.OK).body(new HallResponse(getHallDetails(userId), "hall data"));
         } catch (Exception err) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new HallResponse(getHallDetails(userId), ServerConstants.UNEXPECTED_ERROR));
@@ -237,11 +237,13 @@ public class RoomController {
         if (!connectionDBInstance.isValueExist(ServerConstants.ROOMS_TABLE, "room_id", roomId)) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new RoomResponse(String.format(ServerConstants.ROOM_ID_NOT_EXISTS, roomId), null, null));
         }
-        if (!isUserRoomMember(userId, roomId)) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new RoomResponse(String.format(ServerConstants.USER_NOT_A_ROOM_MEMBER, userId), null, null));
-        }
         try {
             Room room = getRoomDetails(roomId);
+            if(room.isPrivacy()){
+                if (!isUserRoomMember(userId, roomId)) {
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new RoomResponse(String.format(ServerConstants.USER_NOT_A_ROOM_MEMBER, userId), null, null));
+                }
+            }
             return ResponseEntity.status(HttpStatus.OK).body(new RoomResponse("Completed successfully", roomId, room));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new RoomResponse(ServerConstants.UNEXPECTED_ERROR, roomId, null));
