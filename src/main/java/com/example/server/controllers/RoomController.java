@@ -207,7 +207,7 @@ public class RoomController {
     @PostMapping("/getIntoRoom")
     public ResponseEntity<Response> getIntoRoom(@RequestParam Integer roomId, @RequestParam Integer userId) {
         try {
-            if (!isUserRoomMember(userId, roomId)) {
+            if (!isUserRoomMember(userId, roomId) && getRoomDetails(roomId).isPrivacy()) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new RoomResponse(String.format(ServerConstants.USER_NOT_A_ROOM_MEMBER, userId), null, null));
             }
             removeUserFromRoom(userId);
